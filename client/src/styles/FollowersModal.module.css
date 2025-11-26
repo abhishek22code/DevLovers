@@ -1,0 +1,110 @@
+/* FollowersModal Component Styles - CSS Module */
+
+.overlay {
+  @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+}
+
+.modal {
+  @apply bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col;
+}
+
+.header {
+  @apply flex items-center justify-between p-6 border-b border-border;
+}
+
+.title {
+  @apply text-2xl font-bold text-foreground;
+}
+
+.closeButton {
+  @apply w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors;
+}
+
+.closeIcon {
+  @apply w-5 h-5 text-foreground;
+}
+
+.searchContainer {
+  @apply p-4 border-b border-border flex items-center gap-3;
+}
+
+.searchIcon {
+  @apply w-5 h-5 text-muted-foreground;
+}
+
+.searchInput {
+  @apply flex-1 bg-background border border-border rounded-lg px-4 py-2 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary;
+}
+
+.content {
+  @apply flex-1 overflow-y-auto p-4;
+}
+
+.loading {
+  @apply flex flex-col items-center justify-center py-12;
+}
+
+.spinner {
+  @apply w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4;
+}
+
+.usersList {
+  @apply space-y-2;
+}
+
+.userItem {
+  @apply flex items-center gap-3 p-3 rounded-lg hover:bg-muted cursor-pointer transition-colors;
+}
+
+.userAvatar {
+  @apply w-12 h-12 rounded-full border-2 border-border;
+}
+
+.userInfo {
+  @apply flex-1 min-w-0;
+}
+
+.userNameRow {
+  @apply flex items-center gap-2;
+}
+
+.userName {
+  @apply font-semibold text-foreground truncate;
+}
+
+.verifiedBadge {
+  @apply inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-500 flex-shrink-0 cursor-default;
+}
+
+.verifiedIcon {
+  @apply w-4 h-4;
+}
+
+.userBio {
+  @apply text-sm text-muted-foreground truncate mt-1;
+}
+
+.userSkills {
+  @apply flex gap-2 mt-2 flex-wrap;
+}
+
+.skillTag {
+  @apply px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs;
+}
+
+.userIcon {
+  @apply w-5 h-5 text-muted-foreground;
+}
+
+.empty {
+  @apply flex flex-col items-center justify-center py-12;
+}
+
+.emptyIcon {
+  @apply w-16 h-16 text-muted-foreground mb-4;
+}
+
+.emptyText {
+  @apply text-muted-foreground;
+}
+

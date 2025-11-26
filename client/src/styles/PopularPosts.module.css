@@ -1,0 +1,179 @@
+/* PopularPosts Component Styles - CSS Module */
+
+.container {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-6;
+}
+
+.empty {
+  @apply text-center text-muted-foreground py-8;
+}
+
+.emptyIcon {
+  @apply w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-primary/20;
+}
+
+.emptyIconSvg {
+  @apply w-8 h-8 text-primary;
+}
+
+.emptyTitle {
+  @apply text-foreground font-medium mb-2;
+}
+
+.emptySubtitle {
+  @apply text-sm text-muted-foreground;
+}
+
+.header {
+  @apply flex items-center justify-between mb-6 p-4 bg-primary/5 rounded-xl border border-primary/20;
+}
+
+.headerContent {
+  @apply flex items-center gap-3;
+}
+
+.headerIcon {
+  @apply p-3 bg-primary/10 rounded-xl border border-primary/20;
+}
+
+.headerIconSvg {
+  @apply w-6 h-6 text-primary;
+}
+
+.headerText {
+  @apply flex-1;
+}
+
+.headerTitle {
+  @apply text-xl font-bold text-foreground;
+}
+
+.headerSubtitle {
+  @apply text-primary text-sm font-medium;
+}
+
+.headerAction {
+  @apply p-3 bg-primary/10 rounded-xl border border-primary/20 hover:bg-primary/20 transition-all duration-200 cursor-pointer;
+}
+
+.headerActionIcon {
+  @apply w-5 h-5 text-primary transition-colors;
+}
+
+/* Hover effect for header action icon when parent is hovered */
+.headerAction:hover .headerActionIcon {
+  @apply text-primary/80;
+}
+
+.list {
+  @apply space-y-4;
+}
+
+.item {
+  @apply p-4 rounded-xl bg-muted/30 border border-border hover:bg-primary/5 hover:border-primary/20 transition-all duration-300 cursor-pointer transform hover:scale-[1.02] hover:shadow-md;
+}
+
+.itemHeader {
+  @apply flex items-center gap-3 mb-3;
+}
+
+.itemRank {
+  @apply flex items-center justify-center w-8 h-8 bg-primary text-primary-foreground rounded-full text-sm font-bold shadow-md;
+}
+
+.itemAvatar {
+  @apply w-8 h-8 rounded-full border-2 border-border transition-colors;
+}
+
+.item:hover .itemAvatar {
+  @apply border-primary;
+}
+
+.itemInfo {
+  @apply flex-1 min-w-0;
+}
+
+.itemAuthor {
+  @apply text-foreground font-medium text-sm truncate transition-colors;
+}
+
+.item:hover .itemAuthor {
+  @apply text-primary;
+}
+
+.itemTimestamp {
+  @apply text-muted-foreground text-xs;
+}
+
+.itemContent {
+  @apply mb-3;
+}
+
+.itemText {
+  @apply text-muted-foreground text-sm line-clamp-2 leading-relaxed transition-colors;
+}
+
+.item:hover .itemText {
+  @apply text-foreground;
+}
+
+.itemStats {
+  @apply flex items-center gap-4 text-xs;
+}
+
+.itemLikes {
+  @apply flex items-center gap-1 text-red-500 transition-colors;
+}
+
+.item:hover .itemLikes {
+  @apply text-red-600;
+}
+
+.itemLikesIcon {
+  @apply w-3 h-3;
+}
+
+.itemComments {
+  @apply flex items-center gap-1 text-primary transition-colors;
+}
+
+.item:hover .itemComments {
+  @apply text-primary/80;
+}
+
+.itemCommentsIcon {
+  @apply w-3 h-3;
+}
+
+.itemTags {
+  @apply flex flex-wrap gap-1 mt-3;
+}
+
+.itemTag {
+  @apply px-2 py-1 bg-primary/10 text-primary text-xs rounded-lg border border-primary/20 transition-colors;
+}
+
+.item:hover .itemTag {
+  @apply bg-primary/20;
+}
+
+.itemTagMore {
+  @apply px-2 py-1 bg-muted text-muted-foreground text-xs rounded-lg;
+}
+
+.footer {
+  @apply mt-6 pt-4 border-t border-border;
+}
+
+.footerContent {
+  @apply text-center;
+}
+
+.footerButton {
+  @apply w-full py-4 px-6 bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 rounded-xl text-primary hover:text-primary/80 transition-all duration-300 font-semibold transform hover:scale-105 hover:shadow-md;
+}
+
+.footerNote {
+  @apply text-muted-foreground text-xs mt-3;
+}
+

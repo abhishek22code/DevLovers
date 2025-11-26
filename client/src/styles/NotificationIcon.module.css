@@ -1,0 +1,177 @@
+/* Notification Icon Styles */
+
+.notificationWrapper {
+  @apply relative;
+}
+
+.notificationIcon {
+  @apply relative p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 cursor-pointer;
+  position: relative;
+}
+
+.bellIcon {
+  @apply w-5 h-5;
+}
+
+.notificationDot {
+  @apply absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1 border-2 border-background;
+  font-size: 10px;
+  line-height: 1;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.notificationModal {
+  @apply absolute top-full mt-2 bg-card border border-border rounded-xl shadow-lg z-50;
+  width: 380px;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  right: 0;
+}
+
+.modalHeader {
+  @apply flex items-center justify-between p-4 border-b border-border;
+}
+
+.modalTitle {
+  @apply text-foreground font-semibold text-lg;
+}
+
+.markAllReadButton {
+  @apply text-xs text-primary hover:text-primary/80 transition-colors;
+}
+
+.modalContent {
+  @apply flex-1 overflow-y-auto;
+  max-height: 400px;
+}
+
+.loading,
+.empty {
+  @apply text-muted-foreground text-sm p-4 text-center;
+}
+
+.notificationsList {
+  @apply flex flex-col;
+}
+
+.notificationItem {
+  @apply flex items-start gap-3 p-4 border-b border-border hover:bg-muted/30 transition-colors cursor-pointer relative;
+}
+
+.notificationItem.unread {
+  @apply bg-primary/5;
+}
+
+.notificationAvatar {
+  @apply w-10 h-10 rounded-full border border-border flex-shrink-0;
+  object-fit: cover;
+  aspect-ratio: 1 / 1;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+}
+
+.notificationContent {
+  @apply flex-1 min-w-0;
+}
+
+.notificationText {
+  @apply text-foreground text-sm;
+}
+
+.notificationTime {
+  @apply text-muted-foreground text-xs mt-1;
+}
+
+.unreadIndicator {
+  @apply absolute right-4 top-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 640px) {
+  .notificationModal {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    right: -1rem;
+    left: auto;
+    max-height: calc(100vh - 8rem);
+  }
+
+  .modalHeader {
+    @apply p-3;
+  }
+
+  .modalTitle {
+    @apply text-base;
+  }
+
+  .markAllReadButton {
+    @apply text-xs;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .modalContent {
+    max-height: calc(100vh - 10rem);
+  }
+
+  .notificationItem {
+    @apply p-3 gap-2;
+  }
+
+  .notificationAvatar {
+    @apply w-12 h-12;
+    min-width: 3rem;
+    min-height: 3rem;
+  }
+
+  .notificationText {
+    @apply text-sm;
+  }
+
+  .notificationTime {
+    @apply text-xs;
+  }
+
+  .unreadIndicator {
+    @apply right-2;
+  }
+
+  .loading,
+  .empty {
+    @apply p-3;
+  }
+}
+
+@media (max-width: 480px) {
+  .notificationModal {
+    width: calc(100vw - 0.5rem);
+    max-width: calc(100vw - 0.5rem);
+    right: -0.5rem;
+  }
+
+  .modalHeader {
+    @apply p-2;
+  }
+
+  .notificationItem {
+    @apply p-2;
+  }
+
+  .notificationAvatar {
+    @apply w-11 h-11;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+}
+

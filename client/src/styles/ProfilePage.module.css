@@ -1,0 +1,328 @@
+/* ProfilePage Component Styles - CSS Module */
+
+.container {
+  @apply min-h-screen bg-background;
+}
+
+.content {
+  @apply max-w-6xl mx-auto px-4 py-8;
+}
+
+.grid {
+  @apply space-y-8;
+}
+
+.header {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-8;
+}
+
+.headerContent {
+  @apply flex flex-col lg:flex-row gap-8 items-start;
+}
+
+.avatarContainer {
+  @apply relative;
+}
+
+.avatar {
+  @apply w-32 h-32 rounded-full border-4 border-border shadow-xl;
+}
+
+.avatarOverlay {
+  @apply absolute inset-0 bg-muted/50 rounded-full flex items-center justify-center;
+}
+
+.avatarEdit {
+  @apply cursor-pointer text-foreground text-center;
+}
+
+.avatarEditIcon {
+  @apply w-8 h-8 mx-auto mb-2;
+}
+
+.avatarEditText {
+  @apply text-sm;
+}
+
+.avatarEditInput {
+  @apply hidden;
+}
+
+.info {
+  @apply flex-1 space-y-4;
+}
+
+.infoHeader {
+  @apply flex items-start justify-between;
+}
+
+.infoContent {
+  @apply flex-1;
+}
+
+.usernameRow {
+  @apply flex items-center gap-3 flex-wrap;
+}
+
+.username {
+  @apply text-3xl font-bold text-foreground;
+}
+
+.usernameInput {
+  @apply text-3xl font-bold text-foreground bg-card border border-border rounded-lg px-3 py-2 w-full max-w-xs;
+}
+
+.role {
+  @apply text-muted-foreground text-lg;
+}
+
+.actions {
+  @apply flex flex-col gap-2 items-stretch;
+}
+
+.actionRow {
+  @apply flex gap-2;
+}
+
+.actionButton {
+  @apply px-4 py-2 rounded-lg flex items-center gap-2;
+}
+
+.actionButtonPrimary {
+  @apply bg-primary hover:bg-primary/90 text-primary-foreground;
+}
+
+.actionButtonSecondary {
+  @apply bg-muted hover:bg-muted/80 text-foreground;
+}
+
+.actionIcon {
+  @apply w-4 h-4;
+}
+
+.verifiedBadge {
+  @apply inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-500 cursor-default;
+}
+
+.verifiedIcon {
+  @apply w-4 h-4;
+}
+
+.verificationButton {
+  @apply bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/15;
+}
+
+.verificationButton:disabled {
+  @apply bg-muted/50 border-muted text-muted-foreground cursor-not-allowed opacity-50;
+}
+
+.verificationButton:disabled:hover {
+  @apply bg-muted/50;
+}
+
+.bio {
+  @apply space-y-2;
+}
+
+.bioText {
+  @apply text-foreground leading-relaxed;
+}
+
+.bioTextarea {
+  @apply w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground placeholder-muted-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200;
+}
+
+.skills {
+  @apply space-y-2;
+}
+
+.skillsTitle {
+  @apply text-foreground font-medium mb-2 flex items-center gap-2;
+}
+
+.skillsIcon {
+  @apply w-4 h-4;
+}
+
+.skillsInput {
+  @apply w-full bg-card border border-border rounded-lg px-3 py-2 text-foreground placeholder-muted-foreground;
+}
+
+.skillsContainer {
+  @apply relative;
+}
+
+.skillsTagsContainer {
+  @apply flex flex-wrap gap-2 items-center bg-card border border-border rounded-lg p-2 min-h-[42px] w-full transition-all duration-200;
+  flex-wrap: wrap;
+}
+
+.skillsTagsContainer:focus-within {
+  @apply ring-2 ring-primary/20 border-primary;
+  outline: none;
+}
+
+.skillsInputInline {
+  @apply flex-1 min-w-[120px] bg-transparent border-none outline-none text-foreground placeholder-muted-foreground px-1;
+  min-width: 150px;
+}
+
+.skillsInputInline:focus {
+  outline: none;
+}
+
+.skillTagEditable {
+  @apply flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm;
+}
+
+.skillTagRemove {
+  @apply flex items-center justify-center w-4 h-4 rounded-full hover:bg-primary/20 text-primary transition-colors;
+  padding: 0;
+  margin-left: 4px;
+}
+
+.skillSuggestions {
+  @apply absolute top-full left-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto w-full;
+}
+
+.skillSuggestionItem {
+  @apply w-full text-left px-4 py-2 hover:bg-muted/50 text-foreground text-sm transition-colors;
+}
+
+.skillsList {
+  @apply flex flex-wrap gap-2;
+}
+
+.skillTag {
+  @apply px-3 py-1 bg-primary/10 text-primary rounded-full text-sm;
+}
+
+.skillsEmpty {
+  @apply text-muted-foreground text-sm;
+}
+
+.stats {
+  @apply flex gap-8 pt-4;
+}
+
+.stat {
+  @apply text-center;
+}
+
+.statButton {
+  @apply text-center cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.statValue {
+  @apply text-2xl font-bold text-foreground;
+}
+
+.statLabel {
+  @apply text-muted-foreground text-sm;
+}
+
+.posts {
+  @apply space-y-6;
+}
+
+.postsHeader {
+  @apply mb-6;
+}
+
+.postsTitle {
+  @apply text-2xl font-bold text-foreground mb-2;
+}
+
+.postsSubtitle {
+  @apply text-muted-foreground;
+}
+
+.postsLoading {
+  @apply space-y-4;
+}
+
+.postsLoadingSkeleton {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-6 animate-pulse;
+}
+
+.postsLoadingAvatar {
+  @apply w-10 h-10 bg-white/20 rounded-full;
+}
+
+.postsLoadingContent {
+  @apply flex-1;
+}
+
+.postsLoadingName {
+  @apply h-4 bg-white/20 rounded w-24 mb-2;
+}
+
+.postsLoadingTimestamp {
+  @apply h-3 bg-white/20 rounded w-32;
+}
+
+.postsLoadingText {
+  @apply space-y-2;
+}
+
+.postsLoadingLine {
+  @apply h-4 bg-white/20 rounded;
+}
+
+.postsLoadingLinePartial {
+  @apply h-4 bg-white/20 rounded w-3/4;
+}
+
+.postsList {
+  @apply space-y-6;
+}
+
+.postsEmpty {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-12 text-center;
+}
+
+.postsEmptyIcon {
+  @apply w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4;
+}
+
+.postsEmptyIconSvg {
+  @apply w-8 h-8 text-muted-foreground;
+}
+
+.postsEmptyTitle {
+  @apply text-xl font-medium text-foreground mb-2;
+}
+
+.postsEmptySubtitle {
+  @apply text-muted-foreground mb-6;
+}
+
+.postsEmptyButton {
+  @apply bg-primary/10 border border-primary/30 text-foreground px-6 py-3 rounded-xl font-semibold transition-colors hover:bg-primary/20;
+}
+
+.matchSection {
+  @apply mt-6 pt-4 border-t border-border;
+}
+
+.matchButton {
+  @apply flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95;
+}
+
+.matchButtonMatched {
+  @apply bg-green-500/10 border border-green-500/30 text-green-500;
+}
+
+.matchButtonUnmatched {
+  @apply bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20;
+}
+
+.matchIcon {
+  @apply w-5 h-5;
+}
+
+
+

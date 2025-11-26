@@ -1,0 +1,582 @@
+const mongoose = require('mongoose');
+const User = require('../models/User');
+const Post = require('../models/Post');
+const emailService = require('../services/emailService');
+
+exports.getUsers = async (req, res) => {
+  try {
+    console.log('🔍 getUsers endpoint called');
+    console.log('🔍 Request query:', req.query);
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = (req.query.search || '').trim();
+    const skip = (page - 1) * limit;
+
+    console.log('🔍 Search request:', { search, page, limit, skip });
+
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      console.error('❌ MongoDB not connected!');
+      return res.status(500).json({ message: 'Database connection error' });
+    }
+
+    // Try to get current user from token (optional - for excluding self from results)
+    let currentUserId = null;
+    try {
+      const jwt = require('jsonwebtoken');
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        currentUserId = decoded.userId;
+      }
+    } catch (tokenError) {
+      // Token invalid or missing - that's okay, search is public
+      currentUserId = null;
+    }
+
+    let query = {};
+    
+    // Exclude current user from search results if authenticated
+    if (currentUserId) {
+      query._id = { $ne: mongoose.Types.ObjectId.isValid(currentUserId) ? new mongoose.Types.ObjectId(currentUserId) : currentUserId };
+    }
+    
+    if (search && search.length > 0) {
+      try {
+        // Escape special regex characters to prevent errors
+        const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        
+        console.log('🔍 Escaped search:', escapedSearch);
+        
+        // Build search query - search in username and bio
+        // Priority: username matches are more relevant than bio matches
+        const searchQuery = {
+          $or: [
+            { username: { $regex: escapedSearch, $options: 'i' } },
+            { bio: { $regex: escapedSearch, $options: 'i' } }
+          ]
+        };
+        
+        // Combine search query with current user exclusion using $and
+        if (currentUserId) {
+          query = {
+            $and: [
+              searchQuery,
+              { _id: { $ne: mongoose.Types.ObjectId.isValid(currentUserId) ? new mongoose.Types.ObjectId(currentUserId) : currentUserId } }
+            ]
+          };
+        } else {
+          query = searchQuery;
+        }
+        
+        console.log('🔍 Query:', JSON.stringify(query, null, 2));
+      } catch (regexError) {
+        console.error('❌ Regex error:', regexError);
+        // Fallback - just exclude current user if authenticated
+        if (!currentUserId) {
+          query = {};
+        }
+      }
+    }
+
+    console.log('🔍 Executing query...');
+    
+    // Find users - password will be excluded by toJSON transform
+    let users;
+    
+    // If there's a search query, we need to fetch matching results to sort them properly
+    // Then apply pagination after sorting
+    if (search && search.length > 0) {
+      // Fetch matching users (limit to 100 for performance, then sort and paginate)
+      const maxResultsForSorting = 100; // Reduced from 200
+      const allMatchingUsers = await User.find(query)
+        .select('username profilePicture bio skills isVerified')
+        .limit(maxResultsForSorting)
+        .maxTimeMS(10000) // 10 second timeout
+        .lean();
+      
+      // Sort to prioritize username matches over bio matches
+      const searchLower = search.toLowerCase();
+      allMatchingUsers.sort((a, b) => {
+        const aUsernameMatch = (a.username?.toLowerCase() || '').includes(searchLower);
+        const bUsernameMatch = (b.username?.toLowerCase() || '').includes(searchLower);
+        const aBioMatch = (a.bio?.toLowerCase() || '').includes(searchLower);
+        const bBioMatch = (b.bio?.toLowerCase() || '').includes(searchLower);
+        
+        // Prioritize username matches first
+        if (aUsernameMatch && !bUsernameMatch) return -1;
+        if (!aUsernameMatch && bUsernameMatch) return 1;
+        
+        // Then prioritize bio matches
+        if (aBioMatch && !bBioMatch) return -1;
+        if (!aBioMatch && bBioMatch) return 1;
+        
+        // Finally sort alphabetically by username
+        return ((a.username || '').toLowerCase()).localeCompare((b.username || '').toLowerCase());
+      });
+      
+      // Apply pagination after sorting
+      users = allMatchingUsers.slice(skip, skip + limit);
+    } else {
+      // No search - just normal pagination
+      users = await User.find(query)
+        .select('username profilePicture bio skills isVerified')
+        .sort({ username: 1 })
+        .skip(skip)
+        .limit(limit)
+        .maxTimeMS(10000) // 10 second timeout
+        .lean();
+    }
+
+    console.log('🔍 Found users:', users.length);
+
+    // Remove password from results manually
+    const sanitizedUsers = users.map(user => {
+      try {
+        const userObj = user.toObject ? user.toObject() : (typeof user === 'object' ? { ...user } : {});
+        delete userObj.password;
+        // Ensure isVerified is a boolean
+        if (userObj.isVerified !== undefined) {
+          userObj.isVerified = !!userObj.isVerified;
+        }
+        return userObj;
+      } catch (e) {
+        console.error('Error processing user:', e);
+        return user;
+      }
+    });
+
+    const total = await User.countDocuments(query);
+
+    console.log('🔍 Returning response with', sanitizedUsers.length, 'users');
+
+    res.json({ 
+      users: sanitizedUsers, 
+      currentPage: page, 
+      totalPages: Math.ceil(total / limit), 
+      totalUsers: total 
+    });
+  } catch (error) {
+    console.error('❌ Get users error:', error);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error name:', error.name);
+    res.status(500).json({ 
+      message: 'Server error', 
+      error: error.message,
+      name: error.name,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+};
+
+exports.getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    // Safely populate followers and following, handle cases where arrays might be undefined
+    const user = await User.findById(id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Populate only if arrays exist and have items
+    try {
+      if (user.followers && Array.isArray(user.followers) && user.followers.length > 0) {
+        await user.populate({
+          path: 'followers',
+          select: 'username profilePicture isVerified'
+        });
+      }
+      if (user.following && Array.isArray(user.following) && user.following.length > 0) {
+        await user.populate({
+          path: 'following',
+          select: 'username profilePicture isVerified'
+        });
+      }
+    } catch (populateError) {
+      console.warn('Populate error in getUserById:', populateError.message);
+      // Continue without populate if it fails
+    }
+    
+    // Add follow status if user is authenticated (optional check)
+    // Check for token manually since this is a public endpoint
+    let currentUserId = null;
+    if (req.user) {
+      currentUserId = req.user._id;
+    } else {
+      // Try to get user from token if present but not required
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (token) {
+        try {
+          const jwt = require('jsonwebtoken');
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          currentUserId = decoded.userId;
+        } catch (error) {
+          // Token invalid or missing - ignore
+        }
+      }
+    }
+    
+    if (currentUserId) {
+      // Check if currentUser is following this user (currentUser follows user)
+      // This means currentUser._id should be in user.followers
+      const isFollowing = user.followers && user.followers.some(
+        follower => {
+          const followerId = typeof follower === 'object' ? follower._id.toString() : follower.toString();
+          return followerId === currentUserId.toString();
+        }
+      );
+      // Check if this user is following currentUser (user follows currentUser)
+      // This means currentUser._id should be in user.following
+      const isFollowedBy = user.following && user.following.some(
+        following => {
+          const followingId = typeof following === 'object' ? following._id.toString() : following.toString();
+          return followingId === currentUserId.toString();
+        }
+      );
+      user._doc.isFollowing = !!isFollowing;
+      user._doc.isFollowedBy = !!isFollowedBy;
+      user._doc.isMutualFollow = !!isFollowing && !!isFollowedBy;
+    }
+    
+    // Ensure isVerified is always a boolean
+    if (user._doc) {
+      user._doc.isVerified = !!user._doc.isVerified;
+    } else {
+      user.isVerified = !!user.isVerified;
+    }
+    
+    res.json(user);
+  } catch (error) {
+    console.error('Get user error:', error);
+    if (error.name === 'CastError' || error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getUserPosts = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const posts = await Post.find({ author: id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('author', 'username profilePicture isVerified')
+      .populate({
+        path: 'likes',
+          select: 'username profilePicture',
+        options: { default: [] }
+      })
+      .populate({
+        path: 'comments.user',
+          select: 'username profilePicture',
+        options: { default: [] }
+      });
+    const total = await Post.countDocuments({ author: id });
+    res.json({ posts, currentPage: page, totalPages: Math.ceil(total / limit), totalPosts: total });
+  } catch (error) {
+    console.error('Get user posts error:', error);
+    if (error.name === 'CastError' || error.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.toggleFollow = async (req, res) => {
+  try {
+    if (req.params.id === req.user._id.toString()) {
+      return res.status(400).json({ message: 'You cannot follow yourself' });
+    }
+    const userToFollow = await User.findById(req.params.id);
+    if (!userToFollow) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const currentUser = await User.findById(req.user._id);
+    if (!currentUser) {
+      return res.status(404).json({ message: 'Current user not found' });
+    }
+    
+    // Initialize arrays if they don't exist
+    if (!currentUser.following) currentUser.following = [];
+    if (!userToFollow.followers) userToFollow.followers = [];
+    if (!userToFollow.following) userToFollow.following = [];
+    
+    const isFollowing = currentUser.following.some(
+      id => id.toString() === req.params.id
+    );
+    
+    if (isFollowing) {
+      // Unfollow: remove from currentUser.following and userToFollow.followers
+      currentUser.following = currentUser.following.filter(
+        id => id.toString() !== req.params.id
+      );
+      userToFollow.followers = userToFollow.followers.filter(
+        id => id.toString() !== req.user._id.toString()
+      );
+    } else {
+      // Follow: add to currentUser.following and userToFollow.followers
+      if (!currentUser.following.includes(req.params.id)) {
+        currentUser.following.push(req.params.id);
+      }
+      if (!userToFollow.followers.some(id => id.toString() === req.user._id.toString())) {
+        userToFollow.followers.push(req.user._id);
+      }
+      
+      // Create notification for the user being followed
+      try {
+        const { createNotification } = require('./notificationsController');
+        const Notification = require('../models/Notification');
+        const notification = await createNotification(
+          userToFollow._id,
+          'follow',
+          currentUser._id
+        );
+        
+        // Emit socket event for real-time notification
+        if (notification) {
+          const io = req.app.get('io');
+          if (io) {
+            // Populate notification with fromUser before emitting
+            const populatedNotification = await Notification.findById(notification._id)
+              .populate('fromUser', 'username profilePicture isVerified')
+              .lean();
+            
+            if (populatedNotification) {
+              // Ensure user field is included in notification
+              populatedNotification.user = userToFollow._id;
+              
+              // Emit to the user's room (they joined their userId room on connect)
+              io.to(userToFollow._id.toString()).emit('newNotification', {
+                notification: populatedNotification
+              });
+            }
+          }
+        }
+      } catch (notificationError) {
+        console.error('Error creating follow notification:', notificationError);
+        // Don't fail the follow operation if notification fails
+      }
+    }
+    
+    await currentUser.save();
+    await userToFollow.save();
+    
+    // Check if it's a mutual follow
+    const isFollowedBy = userToFollow.following.some(
+      id => id.toString() === req.user._id.toString()
+    );
+    const isMutualFollow = !isFollowing && isFollowedBy;
+    
+    res.json({ 
+      message: isFollowing ? 'User unfollowed' : 'User followed', 
+      isFollowing: !isFollowing,
+      isFollowedBy,
+      isMutualFollow 
+    });
+  } catch (error) {
+    console.error('Follow user error:', error);
+    if (error.kind === 'ObjectId' || error.name === 'CastError') {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getUserFollowers = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Safely populate followers
+    try {
+      if (user.followers && Array.isArray(user.followers) && user.followers.length > 0) {
+        await user.populate({
+          path: 'followers',
+          select: 'username profilePicture bio skills isVerified',
+          options: { skip, limit }
+        });
+      }
+    } catch (populateError) {
+      console.warn('Populate error in getUserFollowers:', populateError.message);
+    }
+    
+    const total = user.followers && Array.isArray(user.followers) ? user.followers.length : 0;
+    const followers = user.followers && Array.isArray(user.followers) ? user.followers.slice(skip, skip + limit) : [];
+    
+    res.json({ 
+      followers: followers, 
+      currentPage: page, 
+      totalPages: Math.ceil(total / limit), 
+      totalFollowers: total 
+    });
+  } catch (error) {
+    console.error('Get followers error:', error);
+    if (error.kind === 'ObjectId' || error.name === 'CastError') {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.getUserFollowing = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Safely populate following
+    try {
+      if (user.following && Array.isArray(user.following) && user.following.length > 0) {
+        await user.populate({
+          path: 'following',
+          select: 'username profilePicture bio skills isVerified',
+          options: { skip, limit }
+        });
+      }
+    } catch (populateError) {
+      console.warn('Populate error in getUserFollowing:', populateError.message);
+    }
+    
+    const total = user.following && Array.isArray(user.following) ? user.following.length : 0;
+    const following = user.following && Array.isArray(user.following) ? user.following.slice(skip, skip + limit) : [];
+    
+    res.json({ 
+      following: following, 
+      currentPage: page, 
+      totalPages: Math.ceil(total / limit), 
+      totalFollowing: total 
+    });
+  } catch (error) {
+    console.error('Get following error:', error);
+    if (error.kind === 'ObjectId' || error.name === 'CastError') {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const userToDelete = await User.findById(userId);
+    if (!userToDelete) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const deletedPosts = await Post.deleteMany({ author: userId });
+    console.log(`Deleted ${deletedPosts.deletedCount} posts for user ${userId}`);
+    await User.findByIdAndDelete(userId);
+    res.json({ message: 'User and all posts deleted successfully', deletedPosts: deletedPosts.deletedCount });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    if (error.kind === 'ObjectId' || error.name === 'CastError') {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+exports.searchUsersBySkills = async (req, res) => {
+  try {
+    const { skills } = req.query;
+    if (!skills) {
+      return res.status(400).json({ message: 'Skills parameter is required' });
+    }
+    const skillsArray = skills.split(',').map(skill => skill.trim());
+    const users = await User.find({ skills: { $in: skillsArray } })
+      .select('username profilePicture bio skills isVerified')
+      .limit(20);
+    res.json(users);
+  } catch (error) {
+    console.error('Search users by skills error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @route   POST /api/users/verification/request
+// @desc    Send verification request email
+// @access  Private
+exports.requestVerification = async (req, res) => {
+  try {
+    const { body } = req.body;
+    
+    if (!body || !body.trim()) {
+      return res.status(400).json({ message: 'Request body is required' });
+    }
+
+    // Get user from token
+    const userId = req.user._id;
+    const user = await User.findById(userId).select('email username');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.email) {
+      return res.status(400).json({ message: 'User email not found' });
+    }
+
+    // Send verification request email
+    const emailResult = await emailService.sendVerificationRequestEmail(
+      user.email,
+      user.username,
+      body.trim()
+    );
+
+    if (emailResult.success) {
+      if (emailResult.skipped) {
+        console.warn('⚠️ Verification request email skipped (email service not configured)');
+        return res.json({ 
+          message: 'Verification request received. Email service not configured, but request was logged.',
+          skipped: true
+        });
+      }
+      return res.json({ 
+        message: 'Verification request sent successfully. Our team will review it shortly.' 
+      });
+    } else {
+      console.error('Failed to send verification request email:', emailResult.error);
+      return res.status(500).json({ 
+        message: 'Failed to send verification request. Please try again later.',
+        error: emailResult.error
+      });
+    }
+  } catch (error) {
+    console.error('Request verification error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+

@@ -1,0 +1,29 @@
+{
+  "name": "devlovers",
+  "version": "1.0.0",
+  "description": "A full-stack MERN social media app for developers",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": [
+    "mern",
+    "social-media",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "DevLovers Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/line-clamp": "^0.4.4",
+    "autoprefixer": "^10.4.21",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.12"
+  }
+}

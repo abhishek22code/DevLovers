@@ -1,0 +1,321 @@
+/* MessagesPage Component Styles - CSS Module */
+
+.container {
+  @apply min-h-screen bg-background;
+}
+
+.content {
+  @apply max-w-7xl mx-auto px-4 py-8;
+}
+
+.grid {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.conversationsColumn {
+  @apply lg:col-span-1;
+}
+
+.conversationsCard {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-6;
+}
+
+.conversationsHeader {
+  @apply mb-6;
+}
+
+.conversationsTitle {
+  @apply text-2xl font-bold text-foreground mb-2;
+}
+
+.conversationsSubtitle {
+  @apply text-muted-foreground;
+}
+
+.search {
+  @apply relative mb-6;
+}
+
+.searchIcon {
+  @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5;
+}
+
+.searchInput {
+  @apply bg-card border border-border rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 w-full pl-10;
+}
+
+.conversationsList {
+  @apply space-y-2;
+}
+
+.conversation {
+  @apply p-4 rounded-xl cursor-pointer transition-all duration-200;
+}
+
+.conversationActive {
+  @apply bg-primary/10 border border-primary/20;
+}
+
+.conversationInactive {
+  @apply bg-muted/50 hover:bg-muted;
+}
+
+.conversation:hover {
+  transform: scale(1.02);
+}
+
+.conversation:active {
+  transform: scale(0.98);
+}
+
+.conversationContent {
+  @apply flex items-center gap-3;
+}
+
+.conversationAvatarContainer {
+  @apply relative;
+}
+
+.conversationAvatar {
+  @apply w-12 h-12 rounded-full border-2 border-border;
+}
+
+.conversationStatus {
+  @apply absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-card;
+}
+
+.conversationStatusOnline {
+  @apply bg-green-400;
+}
+
+.conversationStatusOffline {
+  @apply bg-gray-400;
+}
+
+.conversationInfo {
+  @apply flex-1 min-w-0;
+}
+
+.conversationHeader {
+  @apply flex items-center justify-between;
+}
+
+.conversationName {
+  @apply text-foreground font-medium truncate;
+}
+
+.conversationTimestamp {
+  @apply text-muted-foreground text-xs;
+}
+
+.conversationMessage {
+  @apply text-muted-foreground text-sm truncate;
+}
+
+.conversationUnread {
+  @apply bg-primary text-primary-foreground text-xs rounded-full w-6 h-6 flex items-center justify-center;
+}
+
+.chatColumn {
+  @apply lg:col-span-2;
+}
+
+.chatCard {
+  @apply bg-card border border-border rounded-2xl shadow-lg h-[600px] flex flex-col;
+}
+
+.chatHeader {
+  @apply flex items-center justify-between p-6 border-b border-border;
+}
+
+.chatHeaderInfo {
+  @apply flex items-center gap-3;
+}
+
+.chatHeaderAvatar {
+  @apply w-12 h-12 rounded-full border-2 border-border;
+}
+
+.chatHeaderDetails {
+  @apply flex-1;
+}
+
+.chatHeaderName {
+  @apply text-foreground font-medium;
+}
+
+.chatHeaderStatus {
+  @apply text-muted-foreground text-sm;
+}
+
+.chatHeaderActions {
+  @apply flex items-center gap-2;
+}
+
+.chatHeaderAction {
+  @apply p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors;
+}
+
+.chatHeaderActionIcon {
+  @apply w-5 h-5;
+}
+
+.chatMessages {
+  @apply flex-1 p-6 overflow-y-auto;
+}
+
+.chatMessagesList {
+  @apply space-y-4;
+}
+
+.chatMessage {
+  @apply flex;
+}
+
+.chatMessageSent {
+  @apply justify-end;
+}
+
+.chatMessageReceived {
+  @apply justify-start;
+}
+
+.chatMessageBubble {
+  @apply p-3 rounded-2xl max-w-xs;
+}
+
+.chatMessageBubbleSent {
+  @apply bg-primary text-primary-foreground rounded-br-md;
+}
+
+.chatMessageBubbleReceived {
+  @apply bg-muted text-foreground rounded-bl-md;
+}
+
+.chatInput {
+  @apply p-6 border-t border-border;
+}
+
+.chatInputForm {
+  @apply flex gap-3;
+}
+
+.chatInputField {
+  @apply bg-card border border-border rounded-xl px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 flex-1;
+  caret-color: hsl(var(--foreground)); /* Ensure text cursor (caret) is visible */
+}
+
+/* Ensure cursor is visible in both light and dark modes */
+.chatInputField:focus {
+  caret-color: hsl(var(--foreground));
+}
+
+.chatInputSubmit {
+  @apply px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground rounded-xl transition-colors flex items-center gap-2;
+}
+
+.chatInputSubmitIcon {
+  @apply w-5 h-5;
+}
+
+.chatInputSubmitText {
+  @apply hidden sm:inline;
+}
+
+.chatEmpty {
+  @apply flex-1 flex items-center justify-center p-8;
+}
+
+.chatEmptyContent {
+  @apply text-center flex flex-col items-center justify-center max-w-md mx-auto;
+}
+
+.chatEmptyIcon {
+  @apply w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4;
+}
+
+.chatEmptyIconSvg {
+  @apply w-8 h-8 text-muted-foreground;
+}
+
+.chatEmptyTitle {
+  @apply text-lg font-medium text-foreground mb-2;
+}
+
+.chatEmptySubtitle {
+  @apply text-sm text-muted-foreground leading-relaxed;
+}
+
+.chatLoading {
+  @apply flex items-center justify-center p-8;
+}
+
+.chatEmptyText {
+  @apply text-lg font-medium text-foreground mb-2;
+}
+
+.chatEmptySubtext {
+  @apply text-sm text-muted-foreground;
+}
+
+.chatMessageTime {
+  @apply text-xs text-black mt-1 block;
+}
+
+.chatMessageRead {
+  @apply ml-1 text-primary;
+}
+
+.typingIndicator {
+  @apply flex gap-1.5 p-2 items-center;
+  min-height: 24px;
+}
+
+.typingIndicator span {
+  @apply w-2 h-2 bg-foreground rounded-full;
+  animation: typing 1.4s infinite;
+  opacity: 0.7;
+}
+
+.typingIndicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typingIndicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+.emptyState {
+  @apply p-8 text-center flex flex-col items-center justify-center min-h-[200px];
+}
+
+.emptyStateText {
+  @apply text-foreground font-medium mb-2 text-lg;
+}
+
+.emptyStateSubtext {
+  @apply text-sm text-muted-foreground max-w-md mx-auto leading-relaxed;
+}
+
+.noMessagesText {
+  @apply italic text-muted-foreground;
+}
+

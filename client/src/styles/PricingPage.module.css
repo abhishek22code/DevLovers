@@ -1,0 +1,229 @@
+/* PricingPage Component Styles - CSS Module */
+
+.container {
+  @apply min-h-screen bg-background;
+}
+
+.content {
+  @apply max-w-7xl mx-auto px-4 py-16;
+}
+
+.header {
+  @apply text-center mb-16;
+}
+
+.headerTitleContainer {
+  @apply mb-8;
+}
+
+.headerTitle {
+  @apply text-5xl font-extrabold text-foreground mb-4;
+}
+
+.headerTitleHighlight {
+  @apply bg-gradient-to-br from-primary to-secondary text-transparent bg-clip-text;
+}
+
+.headerSubtitle {
+  @apply text-xl text-muted-foreground max-w-2xl mx-auto;
+}
+
+.billingToggle {
+  @apply flex items-center justify-center gap-4 mb-8;
+}
+
+.billingLabel {
+  @apply text-sm font-medium;
+}
+
+.billingLabelActive {
+  @apply text-foreground;
+}
+
+.billingLabelInactive {
+  @apply text-muted-foreground;
+}
+
+.billingSwitch {
+  @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors;
+}
+
+.billingSwitchActive {
+  @apply bg-primary;
+}
+
+.billingSwitchInactive {
+  @apply bg-muted;
+}
+
+.billingSwitchThumb {
+  @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
+}
+
+.billingSwitchThumbActive {
+  @apply translate-x-6;
+}
+
+.billingSwitchThumbInactive {
+  @apply translate-x-1;
+}
+
+.billingSavings {
+  @apply bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.cards {
+  display: grid;
+  gap: 2rem;
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.card {
+  @apply relative;
+}
+
+.cardFeatured {
+  @apply bg-card border-2 border-primary rounded-2xl p-8 shadow-xl relative transform scale-105;
+}
+
+.cardRegular {
+  @apply bg-card border border-border rounded-2xl p-8 shadow-lg;
+}
+
+.cardBadge {
+  @apply absolute -top-4 left-1/2 transform -translate-x-1/2;
+}
+
+.cardBadgeText {
+  @apply bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium;
+}
+
+.cardHeader {
+  @apply text-center mb-8;
+}
+
+.cardIcon {
+  @apply inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4;
+}
+
+.cardIconFeatured {
+  @apply bg-primary/20 text-primary;
+}
+
+.cardIconRegular {
+  @apply bg-muted text-muted-foreground;
+}
+
+.cardIconSvg {
+  @apply w-8 h-8;
+}
+
+.cardTitle {
+  @apply text-2xl font-bold text-foreground mb-2;
+}
+
+.cardDescription {
+  @apply text-muted-foreground;
+}
+
+.cardPricing {
+  @apply text-center mb-8;
+}
+
+.cardPriceContainer {
+  @apply flex items-baseline justify-center;
+}
+
+.cardPrice {
+  @apply text-5xl font-extrabold text-foreground;
+}
+
+.cardPricePeriod {
+  @apply text-muted-foreground ml-1;
+}
+
+.cardPriceNote {
+  @apply text-sm text-muted-foreground mt-1;
+}
+
+.cardFeatures {
+  @apply space-y-4 mb-8;
+}
+
+.cardFeature {
+  @apply flex items-start gap-3;
+}
+
+.cardFeatureIcon {
+  @apply w-5 h-5 mt-0.5 flex-shrink-0;
+}
+
+.cardFeatureIconFeatured {
+  @apply text-primary;
+}
+
+.cardFeatureIconRegular {
+  @apply text-muted-foreground;
+}
+
+.cardFeatureText {
+  @apply text-foreground;
+}
+
+.cardButton {
+  @apply w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105;
+}
+
+.cardButtonPrimary {
+  @apply bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95;
+}
+
+.cardButtonOutline {
+  @apply border-2 border-primary text-primary font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 hover:bg-primary hover:text-primary-foreground;
+}
+
+.cardButtonIcon {
+  @apply w-4 h-4 ml-2 inline;
+}
+
+.faq {
+  @apply mt-24 text-center;
+}
+
+.faqTitle {
+  @apply text-3xl font-bold text-foreground mb-8;
+}
+
+.faqGrid {
+  display: grid;
+  gap: 2rem;
+  max-width: 56rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 768px) {
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .faqGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.faqItem {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-6 text-left;
+}
+
+.faqItemTitle {
+  @apply text-lg font-semibold text-foreground mb-2;
+}
+
+.faqItemText {
+  @apply text-muted-foreground;
+}
+
+
+

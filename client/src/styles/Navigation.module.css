@@ -1,0 +1,286 @@
+/* Navigation Component Styles - CSS Module */
+
+.container {
+  @apply w-full px-2;
+}
+
+.content {
+  @apply flex items-center justify-between h-16;
+}
+
+.logo {
+  @apply flex items-center gap-3 cursor-pointer;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logoContent {
+  @apply flex items-center gap-2;
+}
+
+.logoIcon {
+  @apply w-8 h-8 text-primary;
+}
+
+.logoText {
+  @apply text-2xl font-bold bg-gradient-to-br from-primary to-secondary text-transparent bg-clip-text;
+}
+
+.links {
+  @apply hidden md:flex items-center gap-1;
+}
+
+.searchContainer {
+  @apply relative mr-3;
+  position: relative;
+  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  z-index: 100;
+}
+
+.searchContainer:focus,
+.searchContainer:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.searchContainerExpanded {
+  @apply bg-card;
+  border-color: var(--border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  outline: none;
+}
+
+.searchContainerExpanded:focus,
+.searchContainerExpanded:focus-visible {
+  outline: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.searchExpanded {
+  @apply flex items-center gap-2 p-2;
+  min-height: 40px;
+}
+
+.search {
+  @apply relative mr-3;
+}
+
+.searchInput {
+  @apply bg-transparent border-none outline-none text-sm flex-1 placeholder:text-muted-foreground;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.searchInput:focus,
+.searchInput:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+.searchCloseButton {
+  @apply w-7 h-7 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.searchResults {
+  @apply absolute top-full left-0 mt-2 bg-card border border-border rounded-xl shadow-lg z-50;
+  width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.searchResultsHeader {
+  @apply px-3 py-2 border-b border-border;
+}
+
+.searchResultsTitle {
+  @apply text-xs font-medium text-muted-foreground uppercase tracking-wide;
+}
+
+.searchLoading,
+.searchEmpty {
+  @apply text-sm text-muted-foreground px-3 py-4 text-center;
+}
+
+.searchItem {
+  @apply w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all duration-200 cursor-pointer;
+  border-bottom: 1px solid transparent;
+}
+
+.searchItem:hover {
+  @apply bg-muted/50;
+  border-bottom-color: var(--border);
+}
+
+.searchItem:last-child {
+  border-bottom: none;
+}
+
+.searchItemAvatar {
+  @apply w-8 h-8 rounded-full border border-border flex-shrink-0;
+  object-fit: cover;
+}
+
+.searchItemInfo {
+  @apply flex-1 flex flex-col gap-1 min-w-0;
+}
+
+.searchItemName {
+  @apply text-sm font-medium text-foreground truncate;
+}
+
+.searchItemHint {
+  @apply text-xs text-muted-foreground truncate;
+}
+
+.searchItemYou {
+  @apply text-xs font-medium text-primary px-2 py-0.5 rounded bg-primary/10 flex-shrink-0;
+}
+
+.searchItemVerified {
+  @apply text-emerald-500 text-sm font-bold flex-shrink-0;
+  font-size: 14px;
+}
+
+.link {
+  @apply flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200;
+  min-height: 40px;
+  border: 1px solid transparent;
+}
+
+.linkActive {
+  @apply bg-primary/10 text-primary border border-primary/20;
+}
+
+.linkInactive {
+  @apply text-muted-foreground hover:text-foreground hover:bg-muted/50;
+}
+
+.link:hover {
+  transform: scale(1.05);
+}
+
+.link:active {
+  transform: scale(0.95);
+}
+
+.linkIconContainer {
+  @apply relative;
+}
+
+.linkIcon {
+  @apply w-5 h-5;
+}
+
+.notificationDot {
+  @apply absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-background;
+  animation: pulse 2s infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.linkText {
+  @apply font-medium;
+}
+
+.userMenu {
+  @apply flex items-center gap-4;
+}
+
+.userAvatar {
+  @apply flex items-center gap-3 cursor-pointer;
+}
+
+.userAvatar:hover {
+  transform: scale(1.05);
+}
+
+.userImage {
+  @apply w-10 h-10 rounded-full border-2 border-border cursor-pointer hover:border-primary transition-colors;
+}
+
+.userInfo {
+  @apply hidden sm:block text-left;
+}
+
+.userName {
+  @apply text-foreground font-medium text-sm;
+}
+
+.userRole {
+  @apply text-muted-foreground text-xs;
+}
+
+.logoutButton {
+  @apply p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200;
+}
+
+.logoutButton:hover {
+  transform: scale(1.05);
+}
+
+.logoutButton:active {
+  transform: scale(0.95);
+}
+
+.logoutIcon {
+  @apply w-5 h-5;
+}
+
+.mobileMenuButton {
+  @apply md:hidden p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200;
+}
+
+.mobileMenuIcon {
+  @apply w-6 h-6;
+}
+
+.mobileMenu {
+  @apply md:hidden pb-4;
+}
+
+.mobileLinks {
+  @apply flex flex-col gap-2;
+}
+
+.mobileLink {
+  @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200;
+}
+
+.mobileLink:hover {
+  transform: scale(1.02);
+}
+
+.mobileLink:active {
+  transform: scale(0.98);
+}
+
+.mobileLinkIcon {
+  @apply w-5 h-5;
+}
+
+.mobileLinkText {
+  @apply font-medium;
+}
+

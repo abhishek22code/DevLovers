@@ -1,0 +1,287 @@
+/* MainPage Component Styles - CSS Module */
+
+.container {
+  @apply min-h-screen bg-background;
+}
+
+.content {
+  @apply w-full px-2 py-8;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: 250px 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: 280px 1fr;
+  }
+}
+
+.leftColumn {
+  @apply order-1;
+}
+
+.leftSticky {
+  @apply sticky top-8;
+}
+
+.quickActions {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-6 mt-6;
+}
+
+.quickActionsTitle {
+  @apply text-lg font-semibold text-foreground mb-4;
+}
+
+.quickActionsList {
+  @apply space-y-3;
+}
+
+.quickActionButton {
+  @apply w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-foreground;
+}
+
+.quickActionIcon {
+  @apply w-5 h-5 text-muted-foreground;
+}
+
+.quickActionText {
+  @apply flex-1;
+}
+
+.quickActionPrimary {
+  @apply w-full flex items-center gap-3 p-3 rounded-xl bg-primary text-primary-foreground font-medium;
+}
+
+.middleColumn {
+  @apply order-2;
+}
+
+.feedHeader {
+  @apply mb-6;
+}
+
+.feedHeaderContent {
+  @apply flex items-start justify-between gap-4;
+}
+
+.feedTitle {
+  @apply text-2xl font-bold text-foreground mb-2;
+}
+
+.feedSubtitle {
+  @apply text-muted-foreground;
+}
+
+.refreshButton {
+  @apply flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  flex-shrink: 0;
+}
+
+.refreshIcon {
+  @apply w-4 h-4;
+  transition: transform 0.3s ease;
+}
+
+.refreshIconSpinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.refreshText {
+  @apply text-sm font-medium;
+}
+
+.refreshMessage {
+  @apply mb-4 p-4 bg-primary/10 border border-primary/20 rounded-xl text-center;
+}
+
+.refreshMessageText {
+  @apply text-foreground font-medium text-sm;
+}
+
+.feedError {
+  @apply bg-destructive/10 border border-destructive/20 rounded-2xl shadow-lg p-4 mb-6;
+}
+
+.feedErrorText {
+  @apply text-destructive text-center;
+}
+
+.feedErrorRetry {
+  @apply mt-2 text-destructive hover:text-destructive/80 text-sm underline transition-colors;
+}
+
+.feedLoading {
+  @apply space-y-4;
+}
+
+.feedLoadingSkeleton {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-6 animate-pulse;
+}
+
+.feedLoadingAvatar {
+  @apply w-10 h-10 bg-muted rounded-full;
+}
+
+.feedLoadingContent {
+  @apply flex-1;
+}
+
+.feedLoadingName {
+  @apply h-4 bg-muted rounded w-24 mb-2;
+}
+
+.feedLoadingTimestamp {
+  @apply h-3 bg-muted rounded w-32;
+}
+
+.feedLoadingText {
+  @apply space-y-2;
+}
+
+.feedLoadingLine {
+  @apply h-4 bg-muted rounded;
+}
+
+.feedLoadingLinePartial {
+  @apply h-4 bg-muted rounded w-3/4;
+}
+
+.feedEmpty {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-8 text-center;
+}
+
+.feedEmptyContent {
+  @apply text-muted-foreground mb-4;
+}
+
+.feedEmptyIcon {
+  @apply w-16 h-16 mx-auto mb-4 text-muted-foreground/40;
+}
+
+.feedEmptyTitle {
+  @apply text-xl font-semibold text-foreground mb-2;
+}
+
+.feedEmptySubtitle {
+  @apply text-muted-foreground;
+}
+
+.feedPosts {
+  @apply space-y-6;
+}
+
+.feedLoadMore {
+  @apply text-center;
+}
+
+.feedLoadMoreButton {
+  @apply bg-card border border-border text-foreground font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50;
+}
+
+.feedEnd {
+  @apply text-center text-muted-foreground py-8;
+}
+
+.rightColumn {
+  @apply order-3 hidden lg:block;
+}
+
+.rightSticky {
+  @apply sticky top-8;
+}
+
+.trendingHeader {
+  @apply mb-4;
+}
+
+.trendingHeaderCard {
+  @apply bg-card border border-border rounded-2xl shadow-lg p-4;
+}
+
+.trendingHeaderContent {
+  @apply flex items-center justify-between;
+}
+
+.trendingHeaderInfo {
+  @apply flex items-center gap-3;
+}
+
+.trendingHeaderIcon {
+  @apply p-2 bg-primary/10 rounded-lg;
+}
+
+.trendingHeaderIconSvg {
+  @apply w-6 h-6 text-primary;
+}
+
+.trendingHeaderText {
+  @apply flex-1;
+}
+
+.trendingHeaderTitle {
+  @apply text-lg font-bold text-foreground;
+}
+
+.trendingHeaderSubtitle {
+  @apply text-muted-foreground text-sm;
+}
+
+.trendingHeaderButton {
+  @apply border-2 border-primary text-primary font-semibold py-2 px-4 rounded-xl transition-all hover:bg-primary hover:text-primary-foreground text-sm;
+}
+
+.loadingContainer {
+  @apply min-h-screen bg-background flex items-center justify-center;
+}
+
+.loadingContent {
+  @apply text-center;
+}
+
+.loadingSpinner {
+  @apply animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4;
+}
+
+.loadingText {
+  @apply text-foreground text-lg;
+}
+
+.loginPrompt {
+  @apply min-h-screen bg-background flex items-center justify-center;
+}
+
+.loginPromptContent {
+  @apply text-center;
+}
+
+.loginPromptSpinner {
+  @apply animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4;
+}
+
+.loginPromptText {
+  @apply text-foreground text-lg;
+}
+
+.loginPromptButton {
+  @apply mt-4 bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-all duration-200;
+}
+
