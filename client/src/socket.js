@@ -21,29 +21,41 @@ export function getSocket() {
     return socketInstance;
   }
 
-  // Determine socket URL based on environment
-  // In production: use same hostname as the client (API should be on same domain or use env var)
-  // In development: use localhost:3001
+    // Determine socket URL based on environment
+  // Priority:
+  // 1. VITE_SOCKET_URL (explicit socket base URL, no /api)
+  // 2. VITE_API_URL with /api stripped
+  // 3. Localhost dev fallback
   let url;
-  if (typeof window !== 'undefined' && window.location) {
+
+  const explicitSocketUrl = import.meta.env.VITE_SOCKET_URL;
+
+  if (explicitSocketUrl) {
+    // Use explicitly configured socket URL
+    url = explicitSocketUrl.replace(/\/$/, ''); // strip trailing slash
+  } else if (typeof window !== 'undefined' && window.location) {
     const localhostHostname = import.meta.env.VITE_LOCALHOST_HOSTNAME || 'localhost';
-    const isProduction = window.location.hostname !== localhostHostname && window.location.hostname !== '127.0.0.1';
+    const isProduction =
+      window.location.hostname !== localhostHostname &&
+      window.location.hostname !== '127.0.0.1';
+
     if (isProduction) {
-      // Production: use same protocol and hostname, different port if needed
-      // If API is on same domain, use window.location.origin
-      // Otherwise, use VITE_API_URL or default to same origin with /socket.io path
+      // Production: try VITE_API_URL first, strip /api if present
       const apiUrl = import.meta.env.VITE_API_URL || window.location.origin;
-      url = apiUrl.replace(/\/$/, ''); // Remove trailing slash if present
+      // Remove /api or /api/ at the end if present
+      url = apiUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
     } else {
-      // Development: use port 3001
+      // Development: use localhost + VITE_SERVER_PORT (default 3001)
       const serverPort = import.meta.env.VITE_SERVER_PORT || '3001';
       url = `${window.location.protocol}//${window.location.hostname}:${serverPort}`;
     }
   } else {
+    // Non-browser (fallback): assume localhost dev
     const localhostHost = import.meta.env.VITE_LOCALHOST_HOSTNAME || 'localhost';
     const serverPort = import.meta.env.VITE_SERVER_PORT || '3001';
     url = `http://${localhostHost}:${serverPort}`;
   }
+
 
   // Get token from localStorage
   const token = localStorage.getItem('token');
