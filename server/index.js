@@ -32,8 +32,10 @@ const server = http.createServer(app);
 // PORT configuration - use environment variable or default
 // In development: Vite uses 3000, so server should use 3001
 // In production: Use PORT from environment (set by hosting provider)
-const isDevelopment = !process.env.NODE_ENV || process.env.NODE_ENV === 'development' || process.env.NODE_ENV !== 'production';
-let PORT = process.env.PORT || (isDevelopment ? 3001 : 5000);
+
+const isDevelopment = process.env.NODE_ENV !== 'production';
+let PORT = process.env.PORT || 3001;
+
 
 // Only force 3001 in development if PORT conflicts with Vite
 if (isDevelopment && (PORT === 3000 || PORT === '3000')) {
