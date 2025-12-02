@@ -394,7 +394,7 @@ exports.searchUsersBySkills = async (req, res) => {
 
 exports.requestVerification = async (req, res) => {
   try {
-    const { body } = req.body;
+  const { body, toEmail } = req.body;
 
     if (!body || !body.trim()) {
       return res.status(400).json({ success: false, message: 'Request body is required.' });
@@ -422,7 +422,7 @@ exports.requestVerification = async (req, res) => {
       return res.status(200).json({ success: true, skipped: true, message: 'Verification request received.' });
     }
 
-    const emailResult = await emailService.sendVerificationRequestEmail(user.email, user.username, body.trim());
+  const emailResult = await emailService.sendVerificationRequestEmail(user.email, user.username, body.trim(), toEmail && String(toEmail).trim());
 
     if (emailResult && emailResult.success) {
       return res.status(200).json({ success: true, message: 'Verification request sent successfully.' });

@@ -65,7 +65,34 @@ const emailService = {
 
   async sendWelcomeEmail(toEmail, username) { try { const t = ensureTransporter(); if (!t) return { success: true, skipped: true }; const from = process.env.SMTP_FROM || 'no-reply@example.com'; const template = emailTemplates.welcome(username); try { await t.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; } catch (err) { if (err && err.code === 'EAUTH') { await reloadTransporter(); const t2 = ensureTransporter(); if (t2) { await t2.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; } } throw err; } } catch (error) { return { success: false, error: error.message }; } },
 
-  async sendVerificationRequestEmail(fromEmail, username, body) { try { const t = ensureTransporter(); if (!t) return { success: true, skipped: true }; const toEmail = 'abhishekbuisness7985@gmail.com'; const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@example.com'; const subject = 'Verification Request from ' + username + ' (' + fromEmail + ')'; const html = '<div><h2>New Verification Request</h2><p>From: ' + fromEmail + '</p><p>Username: @' + username + '</p><div>' + body.replace(/\n/g, '<br>') + '</div></div>'; try { await t.sendMail({ from, to: toEmail, subject, html, replyTo: fromEmail }); return { success: true }; } catch (err) { if (err && err.code === 'EAUTH') { await reloadTransporter(); const t2 = ensureTransporter(); if (t2) { await t2.sendMail({ from, to: toEmail, subject, html, replyTo: fromEmail }); return { success: true }; } } throw err; } } catch (error) { return { success: false, error: error.message }; } },
+  async sendVerificationRequestEmail(fromEmail, username, body, toEmailParam) {
+    try {
+      const t = ensureTransporter();
+      if (!t) return { success: true, skipped: true };
+
+      const toEmail = (toEmailParam && String(toEmailParam).trim()) || process.env.VERIFICATION_REQUEST_TO || 'abhishekbuisness7985@gmail.com';
+      const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@example.com';
+      const subject = 'Verification Request from ' + username + ' (' + fromEmail + ')';
+      const html = '<div><h2>New Verification Request</h2><p>From: ' + fromEmail + '</p><p>Username: @' + username + '</p><div>' + body.replace(/\n/g, '<br>') + '</div></div>';
+
+      try {
+        await t.sendMail({ from, to: toEmail, subject, html, replyTo: fromEmail });
+        return { success: true };
+      } catch (err) {
+        if (err && err.code === 'EAUTH') {
+          await reloadTransporter();
+          const t2 = ensureTransporter();
+          if (t2) {
+            await t2.sendMail({ from, to: toEmail, subject, html, replyTo: fromEmail });
+            return { success: true };
+          }
+        }
+        throw err;
+      }
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
 
   async testConnection() { try { if (!transporter) return { success: false, error: 'Email service not configured' }; await transporter.verify(); return { success: true }; } catch (error) { return { success: false, error: error.message }; } }
 };
