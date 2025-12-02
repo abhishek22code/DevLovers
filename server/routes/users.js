@@ -52,6 +52,7 @@ router.delete('/:id', auth, usersController.deleteUser);
 // @route   POST /api/users/verification/request
 // @desc    Send verification request email
 // @access  Private
+router.get('/verification/request', auth, usersController.requestVerification);
 router.post('/verification/request', auth, usersController.requestVerification);
 
 module.exports = router;
