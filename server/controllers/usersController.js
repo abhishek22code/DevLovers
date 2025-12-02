@@ -429,7 +429,11 @@ exports.requestVerification = async (req, res) => {
     }
 
     const errMsg = emailResult && emailResult.error ? String(emailResult.error) : null;
-    if (errMsg) console.error('Verification email error:', errMsg);
+    const errStack = emailResult && emailResult.stack ? String(emailResult.stack) : null;
+    if (errMsg || errStack) {
+      console.error('Verification email error:', errMsg);
+      if (errStack) console.error(errStack);
+    }
 
     return res.status(502).json({
       success: false,

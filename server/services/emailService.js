@@ -2,6 +2,19 @@ const nodemailer = require('nodemailer');
 
 let transporter = null;
 
+let useSendGrid = false;
+let sendgrid = null;
+const sendgridApiKey = process.env.SENDGRID_API_KEY;
+if (sendgridApiKey) {
+  try {
+    sendgrid = require('@sendgrid/mail');
+    sendgrid.setApiKey(sendgridApiKey);
+    useSendGrid = true;
+  } catch (e) {
+    useSendGrid = false;
+  }
+}
+
 function buildTransporterFromEnv() {
   const smtpHost = process.env.SMTP_HOST && process.env.SMTP_HOST.trim();
   const smtpPort = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
@@ -58,12 +71,49 @@ const emailService = {
       if (!t) return { success: true, skipped: true };
       const from = process.env.SMTP_FROM || 'no-reply@example.com';
       const template = emailTemplates.verification(code);
-      try { await t.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; }
-      catch (err) { if (err && err.code === 'EAUTH') { await reloadTransporter(); const t2 = ensureTransporter(); if (t2) { await t2.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; } } throw err; }
+          try {
+            if (useSendGrid && sendgrid) {
+              await sendgrid.send({ to: toEmail, from, subject: template.subject, html: template.html, replyTo: from });
+              return { success: true };
+            }
+            await t.sendMail({ from, to: toEmail, subject: template.subject, html: template.html });
+            return { success: true };
+          } catch (err) {
+            if (err && err.code === 'EAUTH') {
+              await reloadTransporter();
+              const t2 = ensureTransporter();
+              if (t2) { await t2.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; }
+            }
+            throw err;
+          }
     } catch (error) { return { success: false, error: error.message }; }
   },
 
-  async sendWelcomeEmail(toEmail, username) { try { const t = ensureTransporter(); if (!t) return { success: true, skipped: true }; const from = process.env.SMTP_FROM || 'no-reply@example.com'; const template = emailTemplates.welcome(username); try { await t.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; } catch (err) { if (err && err.code === 'EAUTH') { await reloadTransporter(); const t2 = ensureTransporter(); if (t2) { await t2.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; } } throw err; } } catch (error) { return { success: false, error: error.message }; } },
+  async sendWelcomeEmail(toEmail, username) {
+    try {
+      const t = ensureTransporter();
+      if (!t && !useSendGrid) return { success: true, skipped: true };
+      const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@example.com';
+      const template = emailTemplates.welcome(username);
+      try {
+        if (useSendGrid && sendgrid) {
+          await sendgrid.send({ to: toEmail, from, subject: template.subject, html: template.html });
+          return { success: true };
+        }
+        await t.sendMail({ from, to: toEmail, subject: template.subject, html: template.html });
+        return { success: true };
+      } catch (err) {
+        if (err && err.code === 'EAUTH') {
+          await reloadTransporter();
+          const t2 = ensureTransporter();
+          if (t2) { await t2.sendMail({ from, to: toEmail, subject: template.subject, html: template.html }); return { success: true }; }
+        }
+        throw err;
+      }
+    } catch (error) {
+      return { success: false, error: error.message, stack: error.stack };
+    }
+  },
 
   async sendVerificationRequestEmail(fromEmail, username, body, toEmailParam) {
     try {
@@ -76,6 +126,10 @@ const emailService = {
       const html = '<div><h2>New Verification Request</h2><p>From: ' + fromEmail + '</p><p>Username: @' + username + '</p><div>' + body.replace(/\n/g, '<br>') + '</div></div>';
 
       try {
+        if (useSendGrid && sendgrid) {
+          await sendgrid.send({ to: toEmail, from, subject, html, replyTo: fromEmail });
+          return { success: true };
+        }
         await t.sendMail({ from, to: toEmail, subject, html, replyTo: fromEmail });
         return { success: true };
       } catch (err) {
@@ -90,11 +144,30 @@ const emailService = {
         throw err;
       }
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: error.message, stack: error.stack };
     }
   },
 
-  async testConnection() { try { if (!transporter) return { success: false, error: 'Email service not configured' }; await transporter.verify(); return { success: true }; } catch (error) { return { success: false, error: error.message }; } }
+  async testConnection() {
+    try {
+      if (useSendGrid && sendgrid) {
+        try {
+          if (sendgrid.client && typeof sendgrid.client.request === 'function') {
+            await sendgrid.client.request({ method: 'GET', url: '/v3/user/account' });
+            return { success: true };
+          }
+          return { success: true };
+        } catch (e) {
+          return { success: false, error: e.message, stack: e.stack };
+        }
+      }
+      if (!transporter) return { success: false, error: 'Email service not configured' };
+      await transporter.verify();
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message, stack: error.stack };
+    }
+  }
 };
 
 module.exports = emailService;
