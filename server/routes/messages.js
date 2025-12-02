@@ -9,15 +9,6 @@ const {
   getUnreadCount
 } = require('../controllers/messagesController');
 
-// Debug: Log route registration
-console.log('📨 Messages routes module loaded');
-console.log('📨 Registering routes:');
-console.log('  GET  /api/messages/conversations');
-console.log('  GET  /api/messages/unread/count');
-console.log('  POST /api/messages/send');
-console.log('  POST /api/messages/read');
-console.log('  GET  /api/messages/:userId');
-
 // Test route without auth to verify router is working
 router.get('/test', (req, res) => {
   res.json({ message: 'Messages router is working', path: req.path, timestamp: new Date().toISOString() });
@@ -29,10 +20,7 @@ router.get('/debug/all', auth, async (req, res) => {
     const Message = require('../models/Message');
     const userId = req.user._id.toString();
     
-    // Get ALL messages (no filters at all)
     const allMessages = await Message.find({}).sort({ createdAt: -1 }).limit(100).lean();
-    
-    // Filter to messages for current user
     const userMessages = allMessages.filter(m => {
       const senderStr = String(m.sender || m.sender?._id || '');
       const receiverStr = String(m.receiver || m.receiver?._id || '');
