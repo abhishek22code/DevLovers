@@ -529,53 +529,75 @@ exports.searchUsersBySkills = async (req, res) => {
 exports.requestVerification = async (req, res) => {
   try {
     const { body } = req.body;
-    
+
     if (!body || !body.trim()) {
-      return res.status(400).json({ message: 'Request body is required' });
+      return res.status(400).json({
+        success: false,
+        message: 'Request body is required.'
+      });
     }
 
-    // Get user from token
-    const userId = req.user._id;
+    const userId = req.user?._id || req.user?.id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated.'
+      });
+    }
+
     const user = await User.findById(userId).select('email username');
-    
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'User not found.'
+      });
     }
 
     if (!user.email) {
-      return res.status(400).json({ message: 'User email not found' });
+      return res.status(400).json({
+        success: false,
+        message: 'Email not found for this account.'
+      });
     }
 
-    // Send verification request email
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    if (!emailService || !smtpHost || !smtpUser || !smtpPass) {
+      return res.status(200).json({
+        success: true,
+        skipped: true,
+        message: 'Verification request received.'
+      });
+    }
+
     const emailResult = await emailService.sendVerificationRequestEmail(
       user.email,
       user.username,
       body.trim()
     );
 
-    if (emailResult.success) {
-      if (emailResult.skipped) {
-        console.warn('⚠️ Verification request email skipped (email service not configured)');
-        return res.json({ 
-          message: 'Verification request received. Email service not configured, but request was logged.',
-          skipped: true
-        });
-      }
-      return res.json({ 
-        message: 'Verification request sent successfully. Our team will review it shortly.' 
-      });
-    } else {
-      console.error('Failed to send verification request email:', emailResult.error);
-      return res.status(500).json({ 
-        message: 'Failed to send verification request. Please try again later.',
-        error: emailResult.error
+    if (emailResult && emailResult.success) {
+      return res.status(200).json({
+        success: true,
+        message: 'Verification request sent successfully.'
       });
     }
+
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to process your verification request at the moment.'
+    });
+
   } catch (error) {
-    console.error('Request verification error:', error);
-    res.status(500).json({ message: 'Server error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Server error.'
+    });
   }
 };
+
 
 
 
