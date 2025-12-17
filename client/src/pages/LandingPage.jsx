@@ -2,16 +2,13 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Mail, Lock, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import styles from '../styles/LandingPage.module.css';
 
 const LandingPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [inOtpStep, setInOtpStep] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [pendingEmail, setPendingEmail] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
+  // OTP flow removed - users register and can login immediately
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -23,7 +20,7 @@ const LandingPage = () => {
   const [successMessage, setSuccessMessage] = useState('');
   
   const navigate = useNavigate();
-  const { login, signup, verifyOtp, error, clearError } = useAuth();
+  const { login, signup, error, clearError } = useAuth();
 
   const handleInputChange = (e) => {
     setFormData({
@@ -56,22 +53,17 @@ const LandingPage = () => {
         if (isLogin) {
           navigate('/home');
         } else {
-          if (result?.requiresVerification) {
-            setPendingEmail(formData.email);
-            setInOtpStep(true);
-            setSuccessMessage('OTP sent to your registered email.');
-          } else {
-            setFormData({
-              username: '',
-              email: '',
-              password: '',
-              bio: '',
-              gender: 'prefer-not-to-say'
-            });
-            setIsLogin(true);
-            setSuccessMessage('Account created successfully! Please sign in with your credentials.');
-            clearError();
-          }
+          // Signup succeeded. Our server no longer requires OTP verification.
+          setFormData({
+            username: '',
+            email: '',
+            password: '',
+            bio: '',
+            gender: 'prefer-not-to-say'
+          });
+          setIsLogin(true);
+          setSuccessMessage('Account created successfully! Please sign in with your credentials.');
+          clearError();
         }
       }
     } catch (error) {
@@ -106,7 +98,6 @@ const LandingPage = () => {
             <div className={styles.formSuccess}>{successMessage}</div>
           )}
 
-          {!inOtpStep ? (
             <form onSubmit={handleSubmit} className={styles.formGrid}>
               {!isLogin && (
                 <>
@@ -199,47 +190,6 @@ const LandingPage = () => {
                 )}
               </button>
             </form>
-          ) : (
-            <div className={styles.formGrid}>
-              <h3 className={styles.title} style={{ marginTop: '0.5rem' }}>Verify Email</h3>
-              <p className={styles.subtitle}>OTP sent to {pendingEmail}. Enter the 6-digit code below.</p>
-              <div className={styles.fieldRow}>
-                <label className={styles.label}>One-Time Password</label>
-                <div className={styles.inputWrap}>
-                  <Shield className={styles.inputIcon} />
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={6}
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                    className={styles.input}
-                    placeholder="Enter 6-digit code"
-                  />
-                </div>
-              </div>
-              <button
-                type="button"
-                className={styles.primaryBtn}
-                disabled={isVerifying || otpCode.length !== 6}
-                onClick={async () => {
-                  setIsVerifying(true);
-                  const res = await verifyOtp(pendingEmail, otpCode);
-                  if (res?.success) {
-                    const loginRes = await login(formData.email, formData.password);
-                    if (loginRes?.success) {
-                      navigate('/home');
-                    }
-                  }
-                  setIsVerifying(false);
-                }}
-                style={{ marginTop: '0.5rem' }}
-              >
-                {isVerifying ? 'Verifying…' : 'Verify'}
-              </button>
-            </div>
-          )}
 
           {/* OTP modal removed; OTP is now inline replacing the form */}
 

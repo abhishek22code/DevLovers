@@ -13,7 +13,6 @@ import {
   Briefcase,
   BadgeCheck
 } from 'lucide-react';
-import VerificationRequestModal from '../components/VerificationRequestModal';
 
 // Predefined skills list
 const PREDEFINED_SKILLS = [
@@ -47,7 +46,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
-  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  // verification request removed
 
   const fetchUserPosts = useCallback(async () => {
     if (!user?._id) return;
@@ -422,13 +421,7 @@ const ProfilePage = () => {
                           <Edit className={styles.actionIcon} />
                           Edit Profile
                         </button>
-                        <button
-                          onClick={() => setShowVerificationModal(true)}
-                          className={`${styles.actionButton} ${styles.verificationButton}`}
-                          disabled={user.isVerified === true || user.isVerified === 'true'}
-                        >
-                          {(user.isVerified === true || user.isVerified === 'true') ? 'Already Verified' : 'Request Verification'}
-                        </button>
+                        {/* Request Verification removed */}
                       </>
                     )}
                   </div>
@@ -621,11 +614,7 @@ const ProfilePage = () => {
         type="following"
       />
 
-      <VerificationRequestModal
-        isOpen={showVerificationModal}
-        onClose={() => setShowVerificationModal(false)}
-        username={user.username}
-      />
+      {/* Verification request component removed */}
     </div>
   );
 };

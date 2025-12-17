@@ -45,36 +45,23 @@ exports.signup = async (req, res) => {
       });
     }
 
-    const otp = ('' + Math.floor(100000 + Math.random() * 900000));
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-
     const user = new User({
       username,
       email,
       password,
       bio: bio || '',
       gender: gender || 'prefer-not-to-say',
-      emailVerified: false,
-      emailVerificationCode: otp,
-      emailVerificationExpires: expiresAt
+      emailVerified: true,
+      isVerified: true
     });
 
     console.log('Saving user...');
     await user.save();
     console.log('User saved successfully');
 
-    try {
-      const emailResult = await emailService.sendVerificationEmail(email, otp);
-      if (emailResult.skipped) {
-        console.log('Email sending skipped - SMTP not configured');
-      }
-    } catch (mailErr) {
-      console.error('Email send error:', mailErr);
-    }
-
     res.status(201).json({
-      message: 'Account created. Please verify your email with the OTP sent.',
-      requiresVerification: true
+      message: 'Account created successfully. You may sign in with your credentials.',
+      requiresVerification: false
     });
   } catch (error) {
     console.error('Signup error details:', error);
@@ -320,37 +307,5 @@ exports.logout = async (req, res) => {
   }
 };
 
-exports.verifyOtp = async (req, res) => {
-  try {
-    const { email, code } = req.body;
-    if (!email || !code) {
-      return res.status(400).json({ message: 'Email and code are required' });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid email or code' });
-    }
-    if (user.emailVerified) {
-      return res.json({ message: 'Email already verified', alreadyVerified: true });
-    }
-    if (!user.emailVerificationCode || !user.emailVerificationExpires) {
-      return res.status(400).json({ message: 'No active verification code' });
-    }
-    if (new Date() > user.emailVerificationExpires) {
-      return res.status(400).json({ message: 'Verification code expired' });
-    }
-    if (String(code).trim() !== String(user.emailVerificationCode)) {
-      return res.status(400).json({ message: 'Invalid verification code' });
-    }
-    user.emailVerified = true;
-    user.emailVerificationCode = null;
-    user.emailVerificationExpires = null;
-    await user.save();
-    return res.json({ message: 'Email verified successfully' });
-  } catch (error) {
-    console.error('Verify OTP error:', error);
-    res.status(500).json({ message: 'Server error during verification' });
-  }
-};
 
 

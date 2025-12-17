@@ -20,7 +20,6 @@ router.delete('/profile', auth, authController.deleteProfile);
 
 router.post('/logout', auth, authController.logout);
 
-router.post('/verify-otp', authController.verifyOtp);
 
 module.exports = router;
 

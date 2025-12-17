@@ -287,17 +287,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyOtp = async (email, code) => {
-    try {
-      setError(null);
-      await axios.post('/api/auth/verify-otp', { email, code });
-      return { success: true };
-    } catch (error) {
-      const message = error.response?.data?.message || 'Verification failed';
-      setError(message);
-      return { success: false, message };
-    }
-  };
+  // OTP verification removed: server no longer requires verify-otp flow
 
   const logout = async () => {
     try {
@@ -354,7 +344,6 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     updateProfile,
-    verifyOtp,
     clearError,
     isAuthenticated: !!user
   };

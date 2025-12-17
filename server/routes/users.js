@@ -16,8 +16,7 @@ router.post('/:id/follow', auth, usersController.toggleFollow);
 router.get('/:id/followers', usersController.getUserFollowers);
 router.get('/:id/following', usersController.getUserFollowing);
 router.delete('/:id', auth, usersController.deleteUser);
-router.get('/verification/request', auth, usersController.requestVerification);
-router.post('/verification/request', auth, usersController.requestVerification);
+// verification request endpoints removed
 
 module.exports = router;
 

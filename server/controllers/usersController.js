@@ -443,6 +443,10 @@ exports.requestVerification = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Server error.' });
   }
 };
+// requestVerification removed; verification requests are no longer supported
+// If needed later, re-add a secure implementation behind an admin workflow
+// (function intentionally left out)
+exports.requestVerification = undefined;
 exports.getUserPosts = async (req, res) => {
   try {
     const { id } = req.params;

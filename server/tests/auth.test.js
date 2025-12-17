@@ -21,39 +21,21 @@ afterAll(async () => {
   if (mongoServer) await mongoServer.stop();
 });
 
-describe('Auth signup and verify OTP', () => {
-  test('signup returns requiresVerification and creates user with OTP', async () => {
+describe('Auth signup and login', () => {
+  test('signup creates user and allows immediate login', async () => {
+    // Signup should succeed and not require OTP verification
     const res = await request(app)
       .post('/api/auth/signup')
       .send({ username: 'john', email: 'john@example.com', password: 'secret123' })
       .expect(201);
-    expect(res.body.requiresVerification).toBe(true);
-  });
+    expect(res.body.requiresVerification).toBe(false);
 
-  test('login blocked until verification', async () => {
-    await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'john@example.com', password: 'secret123' })
-      .expect(403);
-  });
-
-  test('verify-otp marks user verified', async () => {
-    const User = require('../models/User');
-    const user = await User.findOne({ email: 'john@example.com' });
-    expect(user).toBeTruthy();
-    const code = user.emailVerificationCode;
-    await request(app)
-      .post('/api/auth/verify-otp')
-      .send({ email: 'john@example.com', code })
-      .expect(200);
-  });
-
-  test('login succeeds after verification', async () => {
-    const res = await request(app)
+    // Login should succeed immediately after signup
+    const loginRes = await request(app)
       .post('/api/auth/login')
       .send({ email: 'john@example.com', password: 'secret123' })
       .expect(200);
-    expect(res.body.token).toBeTruthy();
+    expect(loginRes.body.token).toBeTruthy();
   });
 });
 
