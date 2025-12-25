@@ -1,6 +1,7 @@
 # DevLovers - Social Media Platform for Developers
 
 A full-stack MERN social media application designed specifically for developers to connect, share code, collaborate, and build a community.
+<img width="1470" height="764" alt="Image" src="https://github.com/user-attachments/assets/b0c748bd-aebe-419f-9a81-810fd570798a" />
 
 ## 🚀 Major Features
 
@@ -467,3 +468,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Happy Coding! 🚀💻**
+
