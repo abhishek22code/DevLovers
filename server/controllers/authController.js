@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const emailService = require('../services/emailService');
 
 const generateToken = (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -51,8 +50,7 @@ exports.signup = async (req, res) => {
       password,
       bio: bio || '',
       gender: gender || 'prefer-not-to-say',
-      emailVerified: true,
-      isVerified: true
+      emailVerified: true
     });
 
     console.log('Saving user...');
@@ -288,9 +286,72 @@ exports.deleteProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const Post = require('../models/Post');
+    const Notification = require('../models/Notification');
+    const Message = require('../models/Message');
+    
+    // 1. Delete all posts by the user (this also removes likes and comments on those posts)
     await Post.deleteMany({ author: userId });
+    console.log(`Deleted all posts for user ${userId}`);
+    
+    // 2. Remove user from all other users' followers arrays
+    await User.updateMany(
+      { followers: userId },
+      { $pull: { followers: userId } }
+    );
+    console.log(`Removed user ${userId} from all followers arrays`);
+    
+    // 3. Remove user from all other users' following arrays
+    await User.updateMany(
+      { following: userId },
+      { $pull: { following: userId } }
+    );
+    console.log(`Removed user ${userId} from all following arrays`);
+    
+    // 4. Remove user's likes from all posts (likes array contains userId)
+    await Post.updateMany(
+      { likes: userId },
+      { $pull: { likes: userId } }
+    );
+    console.log(`Removed user ${userId} likes from all posts`);
+    
+    // 5. Remove user's likes from all comments in all posts
+    await Post.updateMany(
+      { 'comments.likes': userId },
+      { $pull: { 'comments.$[].likes': userId } }
+    );
+    console.log(`Removed user ${userId} likes from all comments`);
+    
+    // 6. Remove or anonymize user's comments from all posts (optional: you can delete comments or keep them as "Deleted User")
+    // For now, we'll remove comments by this user
+    await Post.updateMany(
+      { 'comments.user': userId },
+      { $pull: { comments: { user: userId } } }
+    );
+    console.log(`Removed all comments by user ${userId}`);
+    
+    // 7. Delete all notifications where user is the recipient or sender
+    await Notification.deleteMany({
+      $or: [
+        { user: userId },
+        { fromUser: userId }
+      ]
+    });
+    console.log(`Deleted all notifications for user ${userId}`);
+    
+    // 8. Delete all messages where user is sender or receiver
+    await Message.deleteMany({
+      $or: [
+        { sender: userId },
+        { receiver: userId }
+      ]
+    });
+    console.log(`Deleted all messages for user ${userId}`);
+    
+    // 9. Finally, delete the user
     await User.findByIdAndDelete(userId);
-    res.json({ message: 'Account and all posts deleted successfully' });
+    console.log(`Deleted user ${userId}`);
+    
+    res.json({ message: 'Account and all associated data deleted successfully' });
   } catch (error) {
     console.error('Delete profile error:', error);
     res.status(500).json({ message: 'Server error' });

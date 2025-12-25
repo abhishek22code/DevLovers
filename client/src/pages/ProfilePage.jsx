@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navigation from '../components/Navigation';
 import styles from '../styles/ProfilePage.module.css';
@@ -11,8 +11,11 @@ import {
   Save, 
   X, 
   Briefcase,
-  BadgeCheck
+  BadgeCheck,
+  Trash2
 } from 'lucide-react';
+import ConfirmModal from '../components/ConfirmModal';
+import { useNavigate } from 'react-router-dom';
 
 // Predefined skills list
 const PREDEFINED_SKILLS = [
@@ -29,7 +32,8 @@ const PREDEFINED_SKILLS = [
 
 
 const ProfilePage = () => {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, deleteProfile } = useAuth();
+  const navigate = useNavigate();
   const [userPosts, setUserPosts] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
@@ -46,14 +50,24 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
   const [showFollowingModal, setShowFollowingModal] = useState(false);
-  // verification request removed
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const userId = user?._id;
+  const userIdRef = useRef(userId);
+
+  // Update ref when userId changes
+  useEffect(() => {
+    userIdRef.current = userId;
+  }, [userId]);
 
   const fetchUserPosts = useCallback(async () => {
-    if (!user?._id) return;
+    const currentUserId = userIdRef.current;
+    if (!currentUserId) return;
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users/${user._id}/posts?limit=20`, {
+      const response = await fetch(`/api/users/${currentUserId}/posts?limit=20`, {
         headers: token ? {
           'Authorization': `Bearer ${token}`
         } : {}
@@ -80,11 +94,18 @@ const ProfilePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?._id]);
+  }, []); // No dependencies - uses ref
 
+  // Fetch posts when user changes
   useEffect(() => {
-    if (user) {
+    if (userId) {
       fetchUserPosts();
+    }
+  }, [userId, fetchUserPosts]);
+
+  // Update editData only when user changes and not editing
+  useEffect(() => {
+    if (user && !isEditing) {
       setEditData({
         username: user.username || '',
         bio: user.bio || '',
@@ -93,7 +114,7 @@ const ProfilePage = () => {
       });
       setSkillsInput('');
     }
-  }, [user, fetchUserPosts]);
+  }, [user?.username, user?.bio, user?.skills, user?.profilePicture, isEditing]);
 
   // Filter predefined skills based on input
   useEffect(() => {
@@ -125,16 +146,19 @@ const ProfilePage = () => {
     }
   }, [isEditing]);
 
-  // Consume any pending posts buffered in localStorage
+  // Consume any pending posts buffered in localStorage (only once on mount)
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     try {
       const key = 'dl_pending_posts';
       const raw = localStorage.getItem(key);
       if (!raw) return;
       const buffered = JSON.parse(raw);
       if (!Array.isArray(buffered) || buffered.length === 0) return;
-      const mine = buffered.filter(p => p?.author?._id === user._id);
+      const mine = buffered.filter(p => {
+        const authorId = p?.author?._id || p?.author?.id;
+        return authorId === userId;
+      });
       if (mine.length > 0) {
         setUserPosts(prev => {
           const ids = new Set(prev.map(p => p._id));
@@ -142,36 +166,49 @@ const ProfilePage = () => {
           return toAdd.length ? [...toAdd, ...prev] : prev;
         });
       }
-      const remaining = buffered.filter(p => p?.author?._id !== user._id);
+      const remaining = buffered.filter(p => {
+        const authorId = p?.author?._id || p?.author?.id;
+        return authorId !== userId;
+      });
       localStorage.setItem(key, JSON.stringify(remaining));
     } catch (error) {
       console.error('Failed to reconcile buffered posts:', error);
     }
-  }, [user]);
+    // Only run once when userId is set
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   // Listen for newly created posts globally and prepend to profile posts
   useEffect(() => {
+    if (!userId) return;
+    
     const handleNewPost = (e) => {
       const post = e?.detail;
-      if (!post || !post.author || !user) return;
-      if (post.author._id === user._id) {
-        setUserPosts(prev => [post, ...prev]);
+      if (!post || !post.author) return;
+      const postAuthorId = post.author._id || post.author.id;
+      if (postAuthorId === userIdRef.current) {
+        setUserPosts(prev => {
+          // Check if post already exists to prevent duplicates
+          const exists = prev.some(p => p._id === post._id);
+          if (exists) return prev;
+          return [post, ...prev];
+        });
       }
     };
     window.addEventListener('post:created', handleNewPost);
     return () => window.removeEventListener('post:created', handleNewPost);
-  }, [user]);
+  }, [userId]);
 
   // Poll profile posts every 20s to simulate real-time updates
   useEffect(() => {
-    if (!user) return;
+    if (!userId) return;
     const id = setInterval(() => {
       fetchUserPosts();
     }, 20000);
     return () => clearInterval(id);
-  }, [user, fetchUserPosts]);
+  }, [userId, fetchUserPosts]);
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       // Add any remaining input as skills
       const finalSkills = [...editData.skills];
@@ -195,15 +232,17 @@ const ProfilePage = () => {
       if (result.success) {
         setIsEditing(false);
         setSkillsInput('');
-        // Refresh posts in case username/avatar changed and affects rendering
-        fetchUserPosts();
+        // Only refresh posts if username or profile picture changed
+        if (editData.username !== user?.username || editData.profilePicture !== user?.profilePicture) {
+          fetchUserPosts();
+        }
       }
     } catch (error) {
       console.error('Error updating profile:', error);
     }
-  };
+  }, [editData, skillsInput, updateProfile, user, fetchUserPosts]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditData({
       username: user?.username || '',
       bio: user?.bio || '',
@@ -212,7 +251,7 @@ const ProfilePage = () => {
     });
     setSkillsInput('');
     setIsEditing(false);
-  };
+  }, [user]);
 
   // Handle skills input change
   const handleSkillsInputChange = (e) => {
@@ -288,6 +327,23 @@ const ProfilePage = () => {
     }));
   };
 
+  // Handle delete profile
+  const handleDeleteProfile = useCallback(async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteProfile();
+      if (result.success) {
+        // Redirect to landing page after successful deletion
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  }, [deleteProfile, navigate]);
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -306,6 +362,25 @@ const ProfilePage = () => {
       transition: { duration: 0.5 }
     }
   };
+
+  // Memoized callbacks for PostCard to prevent unnecessary re-renders
+  const handlePostUpdate = useCallback((updatedPost) => {
+    setUserPosts(prev => prev.map(p => 
+      p._id === updatedPost._id ? updatedPost : p
+    ));
+  }, []);
+
+  const handlePostDelete = useCallback((postId) => {
+    setUserPosts(prev => prev.filter(p => p._id !== postId));
+  }, []);
+
+  const handleOpenFollowersModal = useCallback(() => setShowFollowersModal(true), []);
+  const handleOpenFollowingModal = useCallback(() => setShowFollowingModal(true), []);
+  const handleCloseFollowersModal = useCallback(() => setShowFollowersModal(false), []);
+  const handleCloseFollowingModal = useCallback(() => setShowFollowingModal(false), []);
+  const handleOpenDeleteConfirm = useCallback(() => setShowDeleteConfirm(true), []);
+  const handleCloseDeleteConfirm = useCallback(() => setShowDeleteConfirm(false), []);
+  const handleSetEditing = useCallback(() => setIsEditing(true), []);
 
   if (!user) {
     return (
@@ -415,13 +490,20 @@ const ProfilePage = () => {
                     ) : (
                       <>
                         <button
-                          onClick={() => setIsEditing(true)}
+                          onClick={handleSetEditing}
                           className={`${styles.actionButton} ${styles.actionButtonSecondary}`}
                         >
                           <Edit className={styles.actionIcon} />
                           Edit Profile
                         </button>
-                        {/* Request Verification removed */}
+                        <button
+                          onClick={handleOpenDeleteConfirm}
+                          className={`${styles.actionButton} ${styles.actionButtonDanger}`}
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className={styles.actionIcon} />
+                          {isDeleting ? 'Deleting...' : 'Delete Profile'}
+                        </button>
                       </>
                     )}
                   </div>
@@ -524,14 +606,14 @@ const ProfilePage = () => {
                 {/* Stats */}
                 <div className={styles.stats}>
                   <button
-                    onClick={() => setShowFollowersModal(true)}
+                    onClick={handleOpenFollowersModal}
                     className={styles.statButton}
                   >
                     <p className={styles.statValue}>{user.followerCount || 0}</p>
                     <p className={styles.statLabel}>Followers</p>
                   </button>
                   <button
-                    onClick={() => setShowFollowingModal(true)}
+                    onClick={handleOpenFollowingModal}
                     className={styles.statButton}
                   >
                     <p className={styles.statValue}>{user.followingCount || 0}</p>
@@ -566,14 +648,8 @@ const ProfilePage = () => {
                     key={post._id}
                     post={post}
                     currentUser={user}
-                    onUpdate={(updatedPost) => {
-                      setUserPosts(prev => prev.map(p => 
-                        p._id === updatedPost._id ? updatedPost : p
-                      ));
-                    }}
-                    onDelete={(postId) => {
-                      setUserPosts(prev => prev.filter(p => p._id !== postId));
-                    }}
+                    onUpdate={handlePostUpdate}
+                    onDelete={handlePostDelete}
                   />
                 ))}
               </div>
@@ -601,7 +677,7 @@ const ProfilePage = () => {
       {/* Followers Modal */}
       <FollowersModal
         isOpen={showFollowersModal}
-        onClose={() => setShowFollowersModal(false)}
+        onClose={handleCloseFollowersModal}
         userId={user._id}
         type="followers"
       />
@@ -609,12 +685,23 @@ const ProfilePage = () => {
       {/* Following Modal */}
       <FollowersModal
         isOpen={showFollowingModal}
-        onClose={() => setShowFollowingModal(false)}
+        onClose={handleCloseFollowingModal}
         userId={user._id}
         type="following"
       />
 
-      {/* Verification request component removed */}
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title="Delete Profile"
+          message="Are you sure you want to delete your profile? This action cannot be undone. All your posts, followers, following relationships, messages, and notifications will be permanently deleted."
+          onConfirm={handleDeleteProfile}
+          onCancel={handleCloseDeleteConfirm}
+          confirmText={isDeleting ? "Deleting..." : "Delete Profile"}
+          cancelText="Cancel"
+        />
+      )}
     </div>
   );
 };

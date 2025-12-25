@@ -115,38 +115,6 @@ const emailService = {
     }
   },
 
-  async sendVerificationRequestEmail(fromEmail, username, body, toEmailParam) {
-    try {
-      const t = ensureTransporter();
-      if (!t) return { success: true, skipped: true };
-
-      const toEmail = (toEmailParam && String(toEmailParam).trim()) || process.env.VERIFICATION_REQUEST_TO || 'abhishekbuisness7985@gmail.com';
-      const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'no-reply@example.com';
-      const subject = 'Verification Request from ' + username + ' (' + fromEmail + ')';
-      const html = '<div><h2>New Verification Request</h2><p>From: ' + fromEmail + '</p><p>Username: @' + username + '</p><div>' + body.replace(/\n/g, '<br>') + '</div></div>';
-
-      try {
-        if (useSendGrid && sendgrid) {
-          await sendgrid.send({ to: toEmail, from, subject, html, replyTo: fromEmail });
-          return { success: true };
-        }
-        await t.sendMail({ from, to: toEmail, subject, html, replyTo: fromEmail });
-        return { success: true };
-      } catch (err) {
-        if (err && err.code === 'EAUTH') {
-          await reloadTransporter();
-          const t2 = ensureTransporter();
-          if (t2) {
-            await t2.sendMail({ from, to: toEmail, subject, html, replyTo: fromEmail });
-            return { success: true };
-          }
-        }
-        throw err;
-      }
-    } catch (error) {
-      return { success: false, error: error.message, stack: error.stack };
-    }
-  },
 
   async testConnection() {
     try {

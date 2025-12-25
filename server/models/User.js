@@ -24,15 +24,7 @@ const userSchema = new mongoose.Schema({
   },
   emailVerified: {
     type: Boolean,
-    default: false
-  },
-  emailVerificationCode: {
-    type: String,
-    default: null
-  },
-  emailVerificationExpires: {
-    type: Date,
-    default: null
+    default: true
   },
   gender: {
     type: String,
@@ -61,10 +53,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   }],
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
   
   followers: {
     type: [{

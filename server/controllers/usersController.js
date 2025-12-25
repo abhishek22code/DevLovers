@@ -392,61 +392,6 @@ exports.searchUsersBySkills = async (req, res) => {
   }
 };
 
-exports.requestVerification = async (req, res) => {
-  try {
-  const { body, toEmail } = req.body;
-
-    if (!body || !body.trim()) {
-      return res.status(400).json({ success: false, message: 'Request body is required.' });
-    }
-
-    const userId = req.user?._id || req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ success: false, message: 'User not authenticated.' });
-    }
-
-    const user = await User.findById(userId).select('email username');
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found.' });
-    }
-
-    if (!user.email) {
-      return res.status(400).json({ success: false, message: 'Email not found for this account.' });
-    }
-
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    if (!emailService || !smtpHost || !smtpUser || !smtpPass) {
-      return res.status(200).json({ success: true, skipped: true, message: 'Verification request received.' });
-    }
-
-  const emailResult = await emailService.sendVerificationRequestEmail(user.email, user.username, body.trim(), toEmail && String(toEmail).trim());
-
-    if (emailResult && emailResult.success) {
-      return res.status(200).json({ success: true, message: 'Verification request sent successfully.' });
-    }
-
-    const errMsg = emailResult && emailResult.error ? String(emailResult.error) : null;
-    const errStack = emailResult && emailResult.stack ? String(emailResult.stack) : null;
-    if (errMsg || errStack) {
-      console.error('Verification email error:', errMsg);
-      if (errStack) console.error(errStack);
-    }
-
-    return res.status(502).json({
-      success: false,
-      message: process.env.NODE_ENV === 'development' ? `Failed to send verification request: ${errMsg}` : 'Failed to send verification request, please try again later.'
-    });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: 'Server error.' });
-  }
-};
-// requestVerification removed; verification requests are no longer supported
-// If needed later, re-add a secure implementation behind an admin workflow
-// (function intentionally left out)
-exports.requestVerification = undefined;
 exports.getUserPosts = async (req, res) => {
   try {
     const { id } = req.params;

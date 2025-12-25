@@ -195,7 +195,6 @@ const LandingPage = () => {
 
           <div className={styles.switchRow}>
             {isLogin ? 'Don\'t have an account? ' : 'Already have an account? '}
-            {!inOtpStep && (
             <button
               type="button"
               className={styles.switchLink}
@@ -214,7 +213,6 @@ const LandingPage = () => {
             >
               {isLogin ? 'Register' : 'Sign in'}
             </button>
-            )}
           </div>
         </div>
       </div>

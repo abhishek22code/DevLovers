@@ -334,6 +334,32 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const deleteProfile = async () => {
+    try {
+      setError(null);
+      await axios.delete('/api/auth/profile');
+      // Clear all auth data
+      localStorage.removeItem('token');
+      try { localStorage.removeItem('user'); } catch (e) {}
+      delete axios.defaults.headers.common['Authorization'];
+      setUser(null);
+      setError(null);
+      
+      // Disconnect socket
+      try {
+        disconnectSocket();
+      } catch (e) {
+        // Socket might not be initialized
+      }
+      
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || 'Failed to delete profile';
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
   const clearError = () => setError(null);
 
   const value = {
@@ -344,6 +370,7 @@ export const AuthProvider = ({ children }) => {
     signup,
     logout,
     updateProfile,
+    deleteProfile,
     clearError,
     isAuthenticated: !!user
   };

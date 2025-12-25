@@ -16,7 +16,7 @@ A full-stack MERN social media application designed specifically for developers 
 
 ### 📝 Posts & Content
 - **Text Posts**: Create, edit, and delete text-based posts with images
-- **Code Posts**: Create and share C++/Java code snippets
+- **Code Posts**: Create and share C++/Java code snippets (display only)
 - **Post Interactions**:
   - Like/unlike posts
   - Comment on posts with nested comments
@@ -63,12 +63,6 @@ A full-stack MERN social media application designed specifically for developers 
   - See their posts, skills, and bio
   - Follow/unfollow from profile page
 - **User Search**: Search users by username or skills
-
-### 💻 Code Runner
-- **Code Execution**: Run C++ and Java code snippets inline
-- **Judge0 Integration**: Compile and execute code with optional stdin
-- **Code Posts**: Create posts with executable code
-- **Output Display**: View code execution results
 
 ### 🎨 UI/UX Features
 - **Dark/Light Theme**: Toggle between dark and light modes with persistent preference
@@ -121,9 +115,6 @@ A full-stack MERN social media application designed specifically for developers 
 - **Morgan** for HTTP request logging
 - **Express Rate Limit** for API rate limiting
 - **Compression** for response compression
-
-### Additional Services
-- **Judge0 API** for code compilation and execution (optional)
 
 ## 📁 Project Structure
 
@@ -237,11 +228,6 @@ DevLovers/
    
    # Socket.IO Configuration
    SOCKET_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-   
-   # Code Runner (Optional)
-   FEATURE_CODE_RUNNER=true
-   JUDGE0_URL=https://your-judge0-instance
-   JUDGE0_KEY=optional-token
    ```
 
 4. **Start MongoDB**
@@ -266,6 +252,31 @@ DevLovers/
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:3001/api
    - Health Check: http://localhost:3001/api/health
+
+## 🌍 Live Deployment
+
+The application is currently hosted and accessible at:
+
+- **Frontend**: [https://devloversapp.vercel.app](https://devloversapp.vercel.app)
+- **Backend API**: [https://devlovers.onrender.com](https://devlovers.onrender.com)
+- **API Health Check**: [https://devlovers.onrender.com/api/health](https://devlovers.onrender.com/api/health)
+
+### Deployment Details
+
+- **Frontend Hosting**: Vercel
+- **Backend Hosting**: Render
+- **Database**: MongoDB Atlas (cloud)
+- **Real-time Features**: Socket.IO enabled on production
+
+### Production Environment
+
+The live deployment uses the same features as the development version:
+- Real-time messaging and notifications
+- Socket.IO for live updates
+- User authentication and profiles
+- Post creation and interactions
+- Follow/unfollow system
+- All features are fully functional
 
 ## 🌐 API Endpoints
 
@@ -309,18 +320,6 @@ DevLovers/
 - `GET /api/notifications/unread/count` - Get unread notification count
 - `POST /api/notifications/read` - Mark all notifications as read
 - `POST /api/notifications/:id/read` - Mark single notification as read
-
-### Code Runner (Optional)
-- `POST /api/runner/compile-run` - Compile and run code (C++/Java)
-
-   Request Body:
-   ```json
-   {
-     "language": "cpp|java",
-     "sourceCode": "...",
-     "stdin": "optional input"
-   }
-   ```
 
 ### Health Check
 - `GET /api/health` - API health check
@@ -464,7 +463,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **TailwindCSS** - CSS framework
 - **Framer Motion** - Animation library
 - **Lucide** - Icon library
-- **Judge0** - Code execution service
 
 ---
 

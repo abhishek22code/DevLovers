@@ -96,6 +96,10 @@
   @apply bg-muted hover:bg-muted/80 text-foreground;
 }
 
+.actionButtonDanger {
+  @apply bg-red-500 hover:bg-red-600 text-white;
+}
+
 .actionIcon {
   @apply w-4 h-4;
 }
@@ -108,17 +112,6 @@
   @apply w-4 h-4;
 }
 
-.verificationButton {
-  @apply bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/15;
-}
-
-.verificationButton:disabled {
-  @apply bg-muted/50 border-muted text-muted-foreground cursor-not-allowed opacity-50;
-}
-
-.verificationButton:disabled:hover {
-  @apply bg-muted/50;
-}
 
 .bio {
   @apply space-y-2;
