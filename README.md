@@ -12,7 +12,6 @@ A full-stack MERN social media application designed specifically for developers 
   - Skills management with predefined suggestions
   - Profile statistics (followers, following, posts count)
 - **Account Deletion**: Complete profile deletion with cascade cleanup (posts, messages, notifications, relationships)
-- **User Verification**: Request verification badge system
 - **Protected Routes**: Route protection for authenticated users
 
 ### 📝 Posts & Content
@@ -142,8 +141,7 @@ DevLovers/
 │   │   │   ├── PostCard.jsx
 │   │   │   ├── ProtectedRoute.jsx
 │   │   │   ├── SkeletonComponents.jsx
-│   │   │   ├── ThemeToggle.jsx
-│   │   │   └── VerificationRequestModal.jsx
+│   │   │   └── ThemeToggle.jsx
 │   │   ├── contexts/           # React contexts
 │   │   │   ├── AuthContext.jsx
 │   │   │   └── FollowContext.jsx
